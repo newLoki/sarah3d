@@ -101,9 +101,13 @@ function checkMovement(obj) {
     'use strict';
 
     if (controls.moveLeft) {
-        obj.mesh.position.x -= 5;
+        if(obj.mesh.position.x > -435) {
+            obj.mesh.position.x -= 5;
+        }
     } else if (controls.moveRight) {
-        obj.mesh.position.x += 5;
+        if(obj.mesh.position.x < 435) {
+            obj.mesh.position.x += 5;
+        }
     } else if (controls.moveForeward) {
         angleSpeed += 0.1;
         delta += 1;
