@@ -16,6 +16,8 @@ var Ball = function () {
     this.mesh = new THREE.Mesh(this.ball, this.material);
     this.mesh.position.y = -400;
     this.mesh.position.x = 0;
+    this.mesh.castShadow = true;
+    this.mesh.receiveShadow = true;
 
     this.doAnimation = function () {
         this.mesh.position.y += 1;
@@ -33,9 +35,14 @@ var Ground = function () {
     'use strict';
 
     this.ground = new THREE.PlaneGeometry(1000, 1000, 100, 100);
-    this.material = new THREE.MeshPhongMaterial({ color : 0x00ff00, wireframe : true });
+    this.material = new THREE.MeshPhongMaterial({
+        map: THREE.ImageUtils.loadTexture( "./stone_ground.jpg" ),
+        shading: THREE.SmoothShading
+    });
     this.mesh = new THREE.Mesh(this.ground, this.material);
     this.mesh.position.z = -50;
+    this.mesh.receiveShadow = true;
+    this.mesh.castShadow = this;
 //    this.mesh.rotation.x = 90;
 };
 
@@ -50,6 +57,8 @@ var Wall = function (x, y, w) {
     this.mesh.position.y = y;
     this.mesh.position.z = 0;
     this.mesh.rotation.x = Math.PI / 2;
+    this.mesh.receiveShadow = true;
+    this.mesh.castShadow = true;
 };
 
 function addWall(x, y , w) {
@@ -65,7 +74,7 @@ function cameraAnimation() {
         camera.rotation.x += Math.PI / 360;
         camera.position.y = -800 * Math.sin(camera.rotation.x);
         camera.position.z = 650 * Math.cos(camera.rotation.x);
-        if (camera.rotation.x > (Math.PI / 2)) {
+        if (camera.rotation.x > (Math.PI / 4)) {
             doCameraAnimation = false;
         }
     }
@@ -89,8 +98,19 @@ var KamikazeBall3D = {
 //        camera.position.z = 0;
 //        camera.rotation.x = Math.PI / 2;
 
-        hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-        scene.add(hemisphereLight);
+        //ambient light, else the full seen is very dark
+        var ambient = new THREE.AmbientLight( 0x444444 );
+        scene.add( ambient );
+
+
+        var spotLight = new THREE.SpotLight( 0xffffff );
+        spotLight.position.set( camera.position.x, camera.position.y, camera.position.z );
+        spotLight.castShadow = true;
+        spotLight.shadowMapWidth = 1024;
+        spotLight.shadowMapHeight = 1024;
+        spotLight.shadowDarkness = 0.5;
+
+        scene.add(spotLight);
 
         scene.add(ground.mesh);
         animatedObjects.push(ball);
@@ -104,6 +124,10 @@ var KamikazeBall3D = {
 
         renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
+        //enable shadow plugin
+        renderer.shadowMapEnabled = true;
+        //anti aliasing
+        renderer.shadowMapSoft = true;
         document.body.appendChild(renderer.domElement);
     },
 
