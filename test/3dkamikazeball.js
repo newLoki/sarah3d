@@ -1,6 +1,8 @@
 var scene, renderer, camera, animatedObjects = [];
 var doCameraAnimation = true;
 var walls = [];
+var ballObj = null;
+var keyboard = new THREEx.KeyboardState();
 
 var Ball = function () {
     'use strict';
@@ -80,6 +82,15 @@ function cameraAnimation() {
     }
 }
 
+function checkMovement(obj) {
+
+    if( keyboard.pressed("left") ) {
+        obj.mesh.position.x -= 5;
+    } else if ( keyboard.pressed("right")) {
+        obj.mesh.position.x += 5;
+    }
+}
+
 var KamikazeBall3D = {
     init : function () {
         'use strict';
@@ -113,6 +124,7 @@ var KamikazeBall3D = {
         scene.add(spotLight);
         scene.add(ground.mesh);
         animatedObjects.push(ball);
+        ballObj = ball;
         scene.add(ball.mesh);
 
         addWall(300, 300, 300);
@@ -135,6 +147,7 @@ var KamikazeBall3D = {
         var i, o;
 
         requestAnimationFrame(KamikazeBall3D.animate);
+        checkMovement(ballObj);
 
         cameraAnimation();
         //enlarge the ground
