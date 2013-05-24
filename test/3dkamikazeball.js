@@ -12,8 +12,9 @@ var angleSpeed = 0.1;
 var delta = 1;
 var cameraDelta = 1;
 var cameraControls = {
-    moveUp   : false,
-    moveDown : false
+    moveUp    : false,
+    moveDown  : false,
+    MAX_SPEED : 5
 };
 
 /**
@@ -35,9 +36,13 @@ function doCameraControls() {
     'use strict';
 
     if (cameraControls.moveUp) {
-        cameraDelta = cameraDelta - 1;
+        if (cameraDelta > -cameraControls.MAX_SPEED) {
+            cameraDelta = cameraDelta - 1;
+        }
     } else if (cameraControls.moveDown) {
-        cameraDelta = cameraDelta + 1;
+        if (cameraDelta < cameraControls.MAX_SPEED) {
+            cameraDelta = cameraDelta + 1;
+        }
     }
 }
 
