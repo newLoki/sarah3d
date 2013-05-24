@@ -2,7 +2,10 @@ var scene, renderer, camera, animatedObjects = [];
 var doCameraAnimation = true;
 var walls = [];
 var ballObj = null;
-var keyboard = new THREEx.KeyboardState();
+var controls = {
+    moveLeft: false,
+    moveRight: false
+};
 
 var Ball = function () {
     'use strict';
@@ -44,7 +47,7 @@ var Ground = function () {
     this.mesh = new THREE.Mesh(this.ground, this.material);
     this.mesh.position.z = -50;
     this.mesh.receiveShadow = true;
-    this.mesh.castShadow = this;
+    this.mesh.castShadow = false;
 //    this.mesh.rotation.x = 90;
 };
 
@@ -84,11 +87,49 @@ function cameraAnimation() {
 
 function checkMovement(obj) {
 
-    if( keyboard.pressed("left") ) {
+    if(controls.moveLeft) {
         obj.mesh.position.x -= 5;
-    } else if ( keyboard.pressed("right")) {
+    } else if (controls.moveRight) {
         obj.mesh.position.x += 5;
     }
+}
+
+function initKeyboard() {
+    document.addEventListener('keydown', function(evt) {
+        switch (evt.keyCode) {
+            case 37: /*left*/
+                controls.moveLeft = true;
+                break;
+            case 65: /*A*/
+                controls.moveLeft = true;
+                break;
+
+            case 39: /*right*/
+                controls.moveRight = true;
+                break;
+            case 68: /*D*/
+                controls.moveRight = true;
+                break;
+        }
+
+    }, false);
+    document.addEventListener('keyup', function(evt) {
+        switch (evt.keyCode) {
+            case 37: /*left*/
+                controls.moveLeft = false;
+                break;
+            case 65: /*A*/
+                controls.moveLeft = false;
+                break;
+
+            case 39: /*right*/
+                controls.moveRight = false;
+                break;
+            case 68: /*D*/
+                controls.moveRight = false;
+                break;
+        }
+    }, false);
 }
 
 var KamikazeBall3D = {
@@ -132,6 +173,8 @@ var KamikazeBall3D = {
         addWall(-200, -200, 200);
         addWall(-100, 100, 200);
         addWall(300, -100, 400);
+
+        initKeyboard();
 
         renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
