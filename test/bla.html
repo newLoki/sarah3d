@@ -1,0 +1,90 @@
+<html>
+    <head>
+	<script src="../three.js/build/three.min.js"></script>
+    </head>
+    <body>
+	<div onclick='doAnimation = false;'>Toggle Animation</div>
+	<script>
+
+	    var camera, scene, renderer;
+	    var geometry, material, mesh;
+	    var geometry2, material2, mesh2;
+	    var delta = 10;
+	    var texture;
+	    var doAnimation = true;
+
+	    init();
+	    animate();
+
+	    function init() {
+
+		camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+		camera.position.z = 1000;
+
+		scene = new THREE.Scene();
+
+		texture = THREE.ImageUtils.loadTexture( "Befehlsblume.jpg" );
+		texture.wrapS = THREE.RepeatWrapping;
+		texture.wrapT = THREE.RepeatWrapping; texture.repeat.set( 1, 1 );
+
+		// geometry = new THREE.CubeGeometry( 500, 500, 500 );
+		geometry = new THREE.SphereGeometry( 500, 64, 32 );
+		material = new THREE.MeshPhongMaterial( { map: texture, color: 0xffffff, wireframe: false } );
+		mesh = new THREE.Mesh( geometry, material );
+
+		geometry2 = new THREE.CubeGeometry( 700, 700, 700 );
+		material2 = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe: true } );
+		mesh2 = new THREE.Mesh( geometry2, material );
+
+
+		scene.add( mesh );
+		scene.add( mesh2 );
+
+		var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+		directionalLight.position.set( 1, 1, 1 ).normalize();
+		scene.add( directionalLight );
+		var hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+		scene.add( hemisphereLight );
+
+
+		// renderer = new THREE.CanvasRenderer();
+		renderer = new THREE.WebGLRenderer();
+		renderer.setSize( window.innerWidth, window.innerHeight );
+
+		document.body.appendChild( renderer.domElement );
+
+	    }
+
+	    function animate() {
+
+		if (!doAnimation) {
+		    return;
+		}
+
+		// note: three.js includes requestAnimationFrame shim
+		requestAnimationFrame( animate );
+
+		mesh.rotation.x += 0.01;
+		mesh.rotation.y += 0.02;
+		if (mesh.position.x > 200) {
+		    delta = -4;
+		    } else if (mesh.position.x < -200) {
+		    delta = 4;
+		}
+		mesh.position.x += delta;
+		mesh.position.y += delta;
+		mesh.position.z += delta;
+
+		mesh2.rotation.y -= 0.01;
+		mesh2.rotation.x -= 0.02;
+		mesh2.rotation.z += 0.01;
+
+		// material.color = 0x000f;
+
+		renderer.render( scene, camera );
+
+	    }
+
+	</script>
+    </body>
+</html>
