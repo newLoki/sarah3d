@@ -11,6 +11,15 @@ var controls = {
 var angleSpeed = 0.1;
 var delta = 1;
 
+var WallConfig =
+    [
+        [300, 300, 300],
+        [-300, 400, 100],
+        [-200, -200, 200],
+        [-100, 100, 200],
+        [300, -100, 400],
+        [0, 500, 1000]
+    ];
 var Ball = function () {
     'use strict';
 
@@ -33,16 +42,20 @@ var Ball = function () {
         this.mesh.position.y += delta;
         if (this.mesh.position.y > 450) {
             this.mesh.position.y = 450;
-            angleSpeed = 0;
+            this.haltBall();
         }
         if (this.mesh.position.y < -450) {
             this.mesh.position.y = -450;
-            angleSpeed = 0;
+            this.haltBall();
         }
         if (angleSpeed !== 0) {
             this.mesh.rotation.x -= angleSpeed;
             camera.position.y += delta;
         }
+    };
+
+    this.haltBall = function () {
+        angleSpeed = 0;
     };
 };
 
@@ -181,6 +194,7 @@ var KamikazeBall3D = {
             ball = new Ball(),
             spotLight,
             ambient,
+            i,
             ground = new Ground();
 
         scene = new THREE.Scene();
@@ -212,11 +226,14 @@ var KamikazeBall3D = {
         ballObj = ball;
         scene.add(ball.mesh);
 
-        addWall(300, 300, 300);
-        addWall(-300, 400, 100);
-        addWall(-200, -200, 200);
-        addWall(-100, 100, 200);
-        addWall(300, -100, 400);
+        for (i = 0; i < WallConfig.length; i = i + 1) {
+            addWall(WallConfig[i][0], WallConfig[i][1], WallConfig[i][2]);
+        }
+//        addWall(300, 300, 300);
+//        addWall(-300, 400, 100);
+//        addWall(-200, -200, 200);
+//        addWall(-100, 100, 200);
+//        addWall(300, -100, 400);
 
         initKeyboard();
 
