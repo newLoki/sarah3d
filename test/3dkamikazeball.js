@@ -54,8 +54,6 @@ var WallConfig =
 var Ball = function () {
     'use strict';
 
-    this.roll = true;
-
     this.ball = new THREE.SphereGeometry(50, 64, 32);
     this.texture = THREE.ImageUtils.loadTexture("images/Befehlsblume.jpg");
     this.texture.wrapS = THREE.RepeatWrapping;
@@ -267,8 +265,7 @@ function initKeyboard() {
 var KamikazeBall3D = {
     init : function () {
         'use strict';
-        var hemisphereLight,
-            ball = new Ball(),
+        var ball = new Ball(),
             spotLight,
             ambient,
             i,
