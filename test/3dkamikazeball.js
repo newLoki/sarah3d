@@ -42,11 +42,11 @@ var Ball = function () {
         this.mesh.position.y += delta;
         if (this.mesh.position.y > 450) {
             this.mesh.position.y = 450;
-            this.haltBall();
+            this.halt();
         }
         if (this.mesh.position.y < -450) {
             this.mesh.position.y = -450;
-            this.haltBall();
+            this.halt();
         }
         if (angleSpeed !== 0) {
             this.mesh.rotation.x -= angleSpeed;
@@ -54,8 +54,9 @@ var Ball = function () {
         }
     };
 
-    this.haltBall = function () {
+    this.halt = function () {
         angleSpeed = 0;
+        delta = 0;
     };
 };
 
@@ -114,11 +115,11 @@ function checkMovement(obj) {
     'use strict';
 
     if (controls.moveLeft) {
-        if(obj.mesh.position.x > -435) {
+        if (obj.mesh.position.x > -435) {
             obj.mesh.position.x -= 5;
         }
     } else if (controls.moveRight) {
-        if(obj.mesh.position.x < 435) {
+        if (obj.mesh.position.x < 435) {
             obj.mesh.position.x += 5;
         }
     } else if (controls.moveForeward) {
@@ -128,6 +129,35 @@ function checkMovement(obj) {
         angleSpeed -= 0.1;
         delta -= 1;
     }
+}
+
+function dist(x1, y1, x2, y2) {
+    'use strict';
+
+    return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+}
+/**
+ * check collision against Walls
+ *
+ * @returns {boolean}
+ */
+function checkWallCollision(obj) {
+    'use strict';
+    var i, j, x, y, w, d;
+    for (i = 0; i < WallConfig.length; i = i + 1) {
+        x = WallConfig[i][0];
+        y = WallConfig[i][1];
+        w = WallConfig[i][2];
+
+        for (j = 0; j < w; j = j + 1) {
+            d = dist(obj.mesh.position.x, obj.mesh.position.y, x + j, y);
+            // console.log('Wall[' + i + '] = (' + x + ', ' + y + ') Dist = ' +  d);
+            if (d < 50) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 function initKeyboard() {
@@ -233,11 +263,6 @@ var KamikazeBall3D = {
         for (i = 0; i < WallConfig.length; i = i + 1) {
             addWall(WallConfig[i][0], WallConfig[i][1], WallConfig[i][2]);
         }
-//        addWall(300, 300, 300);
-//        addWall(-300, 400, 100);
-//        addWall(-200, -200, 200);
-//        addWall(-100, 100, 200);
-//        addWall(300, -100, 400);
 
         initKeyboard();
 
@@ -256,7 +281,10 @@ var KamikazeBall3D = {
 
         requestAnimationFrame(KamikazeBall3D.animate);
         checkMovement(ballObj);
+        if (checkWallCollision(ballObj)) {
 
+            ballObj.halt();
+        }
         cameraAnimation();
         //enlarge the ground
         //this.offset.set(position.x / w * seaTex.repeat.x, position.y / h * seaTex.repeat.y);
