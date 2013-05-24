@@ -16,8 +16,9 @@ var cameraControls = {
     moveDown  : false,
     MAX_SPEED : 5
 };
-var rounds = 0;
+var rounds = 1;
 var wins = 0;
+var scores = 0;
 
 /**
  *
@@ -97,8 +98,14 @@ var Ball = function () {
 
     this.reset = function() {
         rounds += 1;
+        if(scores >= 50) {
+            scores -= 50;
+        } else {
+            scores = 0;
+        }
         angleSpeed = 0.1 * (wins + 1);
         delta = 1;
+        renderStats();
         this.mesh.position.x = 0;
         this.mesh.position.y = -400;
     }
@@ -140,6 +147,12 @@ function addWall(x, y, w) {
     var wall =  new Wall(x, y, w);
     walls.push(wall);
     scene.add(wall.mesh);
+}
+
+function renderStats() {
+    var el = document.getElementById('stats');
+
+    el.innerHTML = 'Wins: ' + wins + ' Round: ' + rounds + ' Score: ' + scores;
 }
 
 function cameraAnimation() {
@@ -239,9 +252,9 @@ function initKeyboard() {
             cameraControls.moveDown = true;
             break;
         case 27: /*ESC*/
-            alert('Wins: ' + wins + ' Round: ' + rounds + ' Score: ' + wins / rounds * 100);
             wins = 0;
-            rounds = 0;
+            rounds = 1;
+            scores = 0;
             break;
         }
 
@@ -325,6 +338,7 @@ var KamikazeBall3D = {
         }
 
         initKeyboard();
+        renderStats();
 
         renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -344,6 +358,7 @@ var KamikazeBall3D = {
 
         if(ballObj.mesh.position.y >= 400) {
             wins += 1;
+            scores += 100;
             ballObj.reset();
         }
 
