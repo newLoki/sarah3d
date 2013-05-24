@@ -1,5 +1,6 @@
 var scene, renderer, camera, animatedObjects = [];
 var doCameraAnimation = true;
+var walls = [];
 
 var Ball = function () {
     'use strict';
@@ -7,7 +8,11 @@ var Ball = function () {
     this.roll = true;
 
     this.ball = new THREE.SphereGeometry(50, 64, 32);
-    this.material = new THREE.MeshPhongMaterial({ color : 0xffff00, wireframe : true });
+    this.texture = THREE.ImageUtils.loadTexture( "./Befehlsblume.jpg" );
+    this.texture.wrapS = THREE.RepeatWrapping;
+    this.texture.wrapT = THREE.RepeatWrapping; this.texture.repeat.set( 1, 1 );
+    //this.material = new THREE.MeshPhongMaterial({ color : 0xffff00, wireframe : true });
+    this.material = new THREE.MeshPhongMaterial( { map: this.texture, color: 0xffffff, wireframe: false } );
     this.mesh = new THREE.Mesh(this.ball, this.material);
     this.mesh.position.y = -400;
     this.mesh.position.x = 0;
@@ -37,8 +42,9 @@ var Ground = function () {
 var Wall = function (x, y, w) {
     'use strict';
 
-    this.ground = new THREE.PlaneGeometry(w, 100, 10, 10);
-    this.material = new THREE.MeshPhongMaterial({ color : 0x0000ff, wireframe : true });
+    //this.ground = new THREE.PlaneGeometry(w, 100, 10, 10);
+    this.ground = new THREE.CubeGeometry(w, 100, 10, w, 10, 10);
+    this.material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture( "./stonewall.jpg" ) });
     this.mesh = new THREE.Mesh(this.ground, this.material);
     this.mesh.position.x = x;
     this.mesh.position.y = y;
@@ -46,6 +52,11 @@ var Wall = function (x, y, w) {
     this.mesh.rotation.x = Math.PI / 2;
 };
 
+function addWall(x, y , w) {
+    var wall =  new Wall(x, y, w);
+    walls.push(wall);
+    scene.add(wall.mesh);
+}
 
 function cameraAnimation() {
     'use strict';
@@ -65,9 +76,7 @@ var KamikazeBall3D = {
         'use strict';
         var hemisphereLight,
             ball = new Ball(),
-            ground = new Ground(),
-            wall,
-            walls = [];
+            ground = new Ground();
 
         scene = new THREE.Scene();
 
@@ -87,21 +96,11 @@ var KamikazeBall3D = {
         animatedObjects.push(ball);
         scene.add(ball.mesh);
 
-        wall = new Wall(300, 300, 300);
-        scene.add(wall.mesh);
-        walls.push(wall);
-        wall = new Wall(-300, 400, 100);
-        scene.add(wall.mesh);
-        walls.push(wall);
-        wall = new Wall(-200, -200, 200);
-        scene.add(wall.mesh);
-        walls.push(wall);
-        wall = new Wall(-100, 100, 200);
-        scene.add(wall.mesh);
-        walls.push(wall);
-        wall = new Wall(300, -100, 400);
-        scene.add(wall.mesh);
-        walls.push(wall);
+        addWall(300, 300, 300);
+        addWall(-300, 400, 100);
+        addWall(-200, -200, 200);
+        addWall(-100, 100, 200);
+        addWall(300, -100, 400);
 
         renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
