@@ -16,6 +16,8 @@ var cameraControls = {
     moveDown  : false,
     MAX_SPEED : 5
 };
+var rounds = 0;
+var wins = 0;
 
 /**
  *
@@ -92,6 +94,14 @@ var Ball = function () {
         angleSpeed = 0;
         delta = 0;
     };
+
+    this.reset = function() {
+        rounds += 1;
+        angleSpeed = 0.1 * (wins + 1);
+        delta = 1;
+        this.mesh.position.x = 0;
+        this.mesh.position.y = -400;
+    }
 };
 
 var Ground = function () {
@@ -228,6 +238,11 @@ function initKeyboard() {
         case 76: /* O */
             cameraControls.moveDown = true;
             break;
+        case 27: /*ESC*/
+            alert('Wins: ' + wins + ' Round: ' + rounds + ' Score: ' + wins / rounds * 100);
+            wins = 0;
+            rounds = 0;
+            break;
         }
 
     }, false);
@@ -326,9 +341,14 @@ var KamikazeBall3D = {
 
         requestAnimationFrame(KamikazeBall3D.animate);
         checkMovement(ballObj);
-        if (checkWallCollision(ballObj)) {
-            ballObj.halt();
 
+        if(ballObj.mesh.position.y >= 400) {
+            wins += 1;
+            ballObj.reset();
+        }
+
+        if (checkWallCollision(ballObj)) {
+            ballObj.reset();
         }
         cameraAnimation();
         doCameraControls();
