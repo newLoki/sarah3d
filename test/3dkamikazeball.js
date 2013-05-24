@@ -3,9 +3,13 @@ var doCameraAnimation = true;
 var walls = [];
 var ballObj = null;
 var controls = {
+    moveForeward : false,
+    moveBackward : false,
     moveLeft: false,
     moveRight: false
 };
+var angleSpeed = 0.1;
+var delta = 1;
 
 var Ball = function () {
     'use strict';
@@ -13,11 +17,12 @@ var Ball = function () {
     this.roll = true;
 
     this.ball = new THREE.SphereGeometry(50, 64, 32);
-    this.texture = THREE.ImageUtils.loadTexture( "images/Befehlsblume.jpg" );
+    this.texture = THREE.ImageUtils.loadTexture("images/Befehlsblume.jpg");
     this.texture.wrapS = THREE.RepeatWrapping;
-    this.texture.wrapT = THREE.RepeatWrapping; this.texture.repeat.set( 1, 1 );
+    this.texture.wrapT = THREE.RepeatWrapping;
+    this.texture.repeat.set(1, 1);
     //this.material = new THREE.MeshPhongMaterial({ color : 0xffff00, wireframe : true });
-    this.material = new THREE.MeshPhongMaterial( { map: this.texture, color: 0xffffff, wireframe: false } );
+    this.material = new THREE.MeshPhongMaterial({ map : this.texture, color : 0xffffff, wireframe : false });
     this.mesh = new THREE.Mesh(this.ball, this.material);
     this.mesh.position.y = -400;
     this.mesh.position.x = 0;
@@ -25,13 +30,18 @@ var Ball = function () {
     this.mesh.receiveShadow = true;
 
     this.doAnimation = function () {
-        this.mesh.position.y += 1;
-        if (this.mesh.position.y > 500) {
-            this.mesh.position.y = 500;
+        this.mesh.position.y += delta;
+        if (this.mesh.position.y > 450) {
+            this.mesh.position.y = 450;
+            angleSpeed = 0;
         }
-        if (camera.position.y < 400) {
-            this.mesh.rotation.x -= 0.1;
-            camera.position.y += 1;
+        if (this.mesh.position.y < -450) {
+            this.mesh.position.y = -450;
+            angleSpeed = 0;
+        }
+        if (angleSpeed !== 0) {
+            this.mesh.rotation.x -= angleSpeed;
+            camera.position.y += delta;
         }
     };
 };
@@ -41,7 +51,7 @@ var Ground = function () {
 
     this.ground = new THREE.PlaneGeometry(1000, 1000, 100, 100);
     this.material = new THREE.MeshPhongMaterial({
-        map: THREE.ImageUtils.loadTexture( "images/stone_ground.jpg" ),
+        map : THREE.ImageUtils.loadTexture("images/stone_ground.jpg"),
         shading: THREE.SmoothShading
     });
     this.mesh = new THREE.Mesh(this.ground, this.material);
@@ -56,7 +66,7 @@ var Wall = function (x, y, w) {
 
     //this.ground = new THREE.PlaneGeometry(w, 100, 10, 10);
     this.ground = new THREE.CubeGeometry(w, 100, 10, w, 10, 10);
-    this.material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture( "images/stonewall.jpg" ) });
+    this.material = new THREE.MeshPhongMaterial({ map : THREE.ImageUtils.loadTexture("images/stonewall.jpg") });
     this.mesh = new THREE.Mesh(this.ground, this.material);
     this.mesh.position.x = x;
     this.mesh.position.y = y;
@@ -66,7 +76,9 @@ var Wall = function (x, y, w) {
     this.mesh.castShadow = true;
 };
 
-function addWall(x, y , w) {
+function addWall(x, y, w) {
+    'use strict';
+
     var wall =  new Wall(x, y, w);
     walls.push(wall);
     scene.add(wall.mesh);
@@ -86,48 +98,78 @@ function cameraAnimation() {
 }
 
 function checkMovement(obj) {
+    'use strict';
 
-    if(controls.moveLeft) {
+    if (controls.moveLeft) {
         obj.mesh.position.x -= 5;
     } else if (controls.moveRight) {
         obj.mesh.position.x += 5;
+    } else if (controls.moveForeward) {
+        angleSpeed += 0.1;
+        delta += 1;
+    } else if (controls.moveBackward) {
+        angleSpeed -= 0.1;
+        delta -= 1;
     }
 }
 
 function initKeyboard() {
-    document.addEventListener('keydown', function(evt) {
+    'use strict';
+    document.addEventListener('keydown', function (evt) {
         switch (evt.keyCode) {
-            case 37: /*left*/
-                controls.moveLeft = true;
-                break;
-            case 65: /*A*/
-                controls.moveLeft = true;
-                break;
-
-            case 39: /*right*/
-                controls.moveRight = true;
-                break;
-            case 68: /*D*/
-                controls.moveRight = true;
-                break;
+        case 38: /* up */
+            controls.moveForeward = true;
+            break;
+        case 87: /*W*/
+            controls.moveForeward = true;
+            break;
+        case 40: /* down */
+            controls.moveBackward = true;
+            break;
+        case 83: /* S */
+            controls.moveBackward = true;
+            break;
+        case 37: /*left*/
+            controls.moveLeft = true;
+            break;
+        case 65: /*A*/
+            controls.moveLeft = true;
+            break;
+        case 39: /*right*/
+            controls.moveRight = true;
+            break;
+        case 68: /*D*/
+            controls.moveRight = true;
+            break;
         }
 
     }, false);
-    document.addEventListener('keyup', function(evt) {
+    document.addEventListener('keyup', function (evt) {
         switch (evt.keyCode) {
-            case 37: /*left*/
-                controls.moveLeft = false;
-                break;
-            case 65: /*A*/
-                controls.moveLeft = false;
-                break;
-
-            case 39: /*right*/
-                controls.moveRight = false;
-                break;
-            case 68: /*D*/
-                controls.moveRight = false;
-                break;
+        case 38: /* up */
+            controls.moveForeward = false;
+            break;
+        case 87: /* W */
+            controls.moveForeward = false;
+            break;
+        case 40: /* down */
+            controls.moveBackward = false;
+            break;
+        case 83: /* S */
+            controls.moveBackward = false;
+            break;
+        case 37: /*left*/
+            controls.moveLeft = false;
+            break;
+        case 65: /*A*/
+            controls.moveLeft = false;
+            break;
+        case 39: /*right*/
+            controls.moveRight = false;
+            break;
+        case 68: /*D*/
+            controls.moveRight = false;
+            break;
         }
     }, false);
 }
@@ -137,6 +179,8 @@ var KamikazeBall3D = {
         'use strict';
         var hemisphereLight,
             ball = new Ball(),
+            spotLight,
+            ambient,
             ground = new Ground();
 
         scene = new THREE.Scene();
@@ -151,12 +195,12 @@ var KamikazeBall3D = {
 //        camera.rotation.x = Math.PI / 2;
 
         //ambient light, else the full seen is very dark
-        var ambient = new THREE.AmbientLight( 0x444444 );
-        scene.add( ambient );
+        ambient = new THREE.AmbientLight(0x444444);
+        scene.add(ambient);
 
 
-        var spotLight = new THREE.SpotLight( 0xffffff );
-        spotLight.position.set( camera.position.x, camera.position.y, camera.position.z );
+        spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(camera.position.x, camera.position.y, camera.position.z);
         spotLight.castShadow = true;
         spotLight.shadowMapWidth = 1024;
         spotLight.shadowMapHeight = 1024;
@@ -181,7 +225,7 @@ var KamikazeBall3D = {
         //enable shadow plugin
         renderer.shadowMapEnabled = true;
         //anti aliasing
-        renderer.shadowMapSoft = true;
+        renderer.shadowMapSoft = false;
         document.body.appendChild(renderer.domElement);
     },
 
