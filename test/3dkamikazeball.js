@@ -10,6 +10,36 @@ var controls = {
 };
 var angleSpeed = 0.1;
 var delta = 1;
+var cameraDelta = 1;
+var cameraControls = {
+    moveUp   : false,
+    moveDown : false
+};
+
+/**
+ *
+ */
+function moveCamera() {
+    'use strict';
+    camera.rotation.x += cameraDelta * Math.PI / 360;
+    if (camera.rotation.x < 0) {
+        camera.rotation.x = camera.rotation.x + 2 * Math.PI;
+    } else if (camera.rotation.x > 2 * Math.PI) {
+        camera.rotation.x = camera.rotation.x - 2 * Math.PI;
+    }
+    camera.position.y = -800 * Math.sin(camera.rotation.x);
+    camera.position.z = 650 * Math.cos(camera.rotation.x);
+}
+
+function doCameraControls() {
+    'use strict';
+
+    if (cameraControls.moveUp) {
+        cameraDelta = cameraDelta - 1;
+    } else if (cameraControls.moveDown) {
+        cameraDelta = cameraDelta + 1;
+    }
+}
 
 var WallConfig =
     [
@@ -18,6 +48,7 @@ var WallConfig =
         [-200, -200, 200],
         [-100, 100, 200],
         [300, -100, 400],
+        [0, 0, 10],
         [0, 500, 1000]
     ];
 var Ball = function () {
@@ -102,11 +133,10 @@ function cameraAnimation() {
     'use strict';
 
     if (doCameraAnimation) {
-        camera.rotation.x += Math.PI / 360;
-        camera.position.y = -800 * Math.sin(camera.rotation.x);
-        camera.position.z = 650 * Math.cos(camera.rotation.x);
+        moveCamera();
         if (camera.rotation.x > (Math.PI / 4)) {
             doCameraAnimation = false;
+            cameraDelta = 0;
         }
     }
 }
@@ -136,6 +166,7 @@ function dist(x1, y1, x2, y2) {
 
     return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
+
 /**
  * check collision against Walls
  *
@@ -188,6 +219,12 @@ function initKeyboard() {
         case 68: /*D*/
             controls.moveRight = true;
             break;
+        case 79: /* O */
+            cameraControls.moveUp = true;
+            break;
+        case 76: /* O */
+            cameraControls.moveDown = true;
+            break;
         }
 
     }, false);
@@ -216,6 +253,12 @@ function initKeyboard() {
             break;
         case 68: /*D*/
             controls.moveRight = false;
+            break;
+        case 79: /* O */
+            cameraControls.moveUp = false;
+            break;
+        case 76: /* O */
+            cameraControls.moveDown = false;
             break;
         }
     }, false);
@@ -282,10 +325,12 @@ var KamikazeBall3D = {
         requestAnimationFrame(KamikazeBall3D.animate);
         checkMovement(ballObj);
         if (checkWallCollision(ballObj)) {
-
             ballObj.halt();
+
         }
         cameraAnimation();
+        doCameraControls();
+        moveCamera();
         //enlarge the ground
         //this.offset.set(position.x / w * seaTex.repeat.x, position.y / h * seaTex.repeat.y);
         for (i = 0; i < animatedObjects.length; i = i + 1) {
