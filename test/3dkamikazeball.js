@@ -8,7 +8,7 @@ var Ball = function () {
     this.roll = true;
 
     this.ball = new THREE.SphereGeometry(50, 64, 32);
-    this.texture = THREE.ImageUtils.loadTexture( "./Befehlsblume.jpg" );
+    this.texture = THREE.ImageUtils.loadTexture( "images/Befehlsblume.jpg" );
     this.texture.wrapS = THREE.RepeatWrapping;
     this.texture.wrapT = THREE.RepeatWrapping; this.texture.repeat.set( 1, 1 );
     //this.material = new THREE.MeshPhongMaterial({ color : 0xffff00, wireframe : true });
@@ -36,7 +36,7 @@ var Ground = function () {
 
     this.ground = new THREE.PlaneGeometry(1000, 1000, 100, 100);
     this.material = new THREE.MeshPhongMaterial({
-        map: THREE.ImageUtils.loadTexture( "./stone_ground.jpg" ),
+        map: THREE.ImageUtils.loadTexture( "images/stone_ground.jpg" ),
         shading: THREE.SmoothShading
     });
     this.mesh = new THREE.Mesh(this.ground, this.material);
@@ -51,7 +51,7 @@ var Wall = function (x, y, w) {
 
     //this.ground = new THREE.PlaneGeometry(w, 100, 10, 10);
     this.ground = new THREE.CubeGeometry(w, 100, 10, w, 10, 10);
-    this.material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture( "./stonewall.jpg" ) });
+    this.material = new THREE.MeshPhongMaterial({ map: THREE.ImageUtils.loadTexture( "images/stonewall.jpg" ) });
     this.mesh = new THREE.Mesh(this.ground, this.material);
     this.mesh.position.x = x;
     this.mesh.position.y = y;
@@ -111,7 +111,6 @@ var KamikazeBall3D = {
         spotLight.shadowDarkness = 0.5;
 
         scene.add(spotLight);
-
         scene.add(ground.mesh);
         animatedObjects.push(ball);
         scene.add(ball.mesh);
@@ -138,6 +137,8 @@ var KamikazeBall3D = {
         requestAnimationFrame(KamikazeBall3D.animate);
 
         cameraAnimation();
+        //enlarge the ground
+        //this.offset.set(position.x / w * seaTex.repeat.x, position.y / h * seaTex.repeat.y);
         for (i = 0; i < animatedObjects.length; i = i + 1) {
             o = animatedObjects[i];
             if (o.hasOwnProperty('doAnimation')) {
