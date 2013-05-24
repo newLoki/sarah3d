@@ -179,7 +179,7 @@ function checkWallCollision(obj) {
         w = WallConfig[i][2];
 
         for (j = 0; j < w; j = j + 1) {
-            d = dist(obj.mesh.position.x, obj.mesh.position.y, x + j, y);
+            d = dist(obj.mesh.position.x, obj.mesh.position.y, x + j - w / 2, y);
             // console.log('Wall[' + i + '] = (' + x + ', ' + y + ') Dist = ' +  d);
             if (d < 50) {
                 return true;
