@@ -56,7 +56,12 @@ var gameStats = {
  */
 function moveCamera() {
     'use strict';
-    camera.rotation.x += cameraDelta * Math.PI / 360;
+    if (cameraDelta) {
+        camera.rotation.x += cameraDelta * Math.PI / 360;
+        if (!doCameraStartAnimation) {
+            cameraDelta = 0;
+        }
+    }
     if (camera.rotation.x < 0) {
         camera.rotation.x = camera.rotation.x + 2 * Math.PI;
     } else if (camera.rotation.x > 2 * Math.PI) {
@@ -199,12 +204,12 @@ function checkMovement(obj) {
     if (controls.moveLeft) {
         if (obj.mesh.position.x > -435) {
             obj.mesh.position.x -= 5;
-            obj.mesh.rotation.z -= 0.1;
+            obj.mesh.rotation.y -= 0.1;
         }
     } else if (controls.moveRight) {
         if (obj.mesh.position.x < 435) {
             obj.mesh.position.x += 5;
-            obj.mesh.rotation.z += 0.1;
+            obj.mesh.rotation.y += 0.1;
         }
     } else if (controls.moveForeward) {
         angleSpeedX += 0.1;
