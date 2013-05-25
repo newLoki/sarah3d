@@ -16,14 +16,16 @@ var cameraControls = {
     moveDown  : false,
     MAX_SPEED : 5
 };
-var GameStats = {
+var gameStats = {
     rounds : 1,
     wins   : 0,
     score : 0,
     el     : null,
     render : function () {
         'use strict';
-        this.el.innerHTML = 'Wins: ' + this.wins + ' Round: ' + this.rounds + ' Score: ' + this.score;
+        if (this.el !== null) {
+            this.el.innerHTML = 'Wins: ' + this.wins + ' Round: ' + this.rounds + ' Score: ' + this.score;
+        }
     },
     reset : function () {
         'use strict';
@@ -127,15 +129,15 @@ var Ball = function () {
     };
 
     this.reset = function () {
-        GameStats.incRound();
-        if (GameStats.score >= 50) {
-            GameStats.incScore(-50);
+        gameStats.incRound();
+        if (gameStats.score >= 50) {
+            gameStats.incScore(-50);
         } else {
-            GameStats.clearScore();
+            gameStats.clearScore();
         }
-        angleSpeed = 0.1 * (GameStats.wins + 1);
+        angleSpeed = 0.1 * (gameStats.wins + 1);
         delta = 1;
-        GameStats.render();
+        gameStats.render();
         this.mesh.position.x = 0;
         this.mesh.position.y = -400;
     };
@@ -276,7 +278,7 @@ function initKeyboard() {
             cameraControls.moveDown = true;
             break;
         case 27: /*ESC*/
-            GameStats.reset();
+            gameStats.reset();
             break;
         }
 
@@ -320,7 +322,7 @@ function initKeyboard() {
 var KamikazeBall3D = {
     init : function () {
         'use strict';
-        GameStats.el = document.getElementById('stats');
+        gameStats.el = document.getElementById('stats');
 
         var ball = new Ball(),
             spotLight,
@@ -362,7 +364,7 @@ var KamikazeBall3D = {
         }
 
         initKeyboard();
-        GameStats.render();
+        gameStats.render();
 
         renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -381,8 +383,8 @@ var KamikazeBall3D = {
         checkMovement(ballObj);
 
         if (ballObj.mesh.position.y >= 400) {
-            GameStats.incWins();
-            GameStats.incScore(100);
+            gameStats.incWins();
+            gameStats.incScore(100);
             ballObj.reset();
         }
 
