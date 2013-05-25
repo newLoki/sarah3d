@@ -1,5 +1,5 @@
 var scene, renderer, camera, animatedObjects = [];
-var doCameraAnimation = true;
+var doCameraStartAnimation = true;
 var walls = [];
 var ballObj = null;
 var controls = {
@@ -179,13 +179,13 @@ function addWall(x, y, w) {
     scene.add(wall.mesh);
 }
 
-function cameraAnimation() {
+function cameraStartAnimation() {
     'use strict';
 
-    if (doCameraAnimation) {
+    if (doCameraStartAnimation) {
         moveCamera();
         if (camera.rotation.x > (Math.PI / 4)) {
-            doCameraAnimation = false;
+            doCameraStartAnimation = false;
             cameraDelta = 0;
         }
     }
@@ -389,7 +389,7 @@ var KamikazeBall3D = {
         if (checkWallCollision(ballObj)) {
             ballObj.reset();
         }
-        cameraAnimation();
+        cameraStartAnimation();
         doCameraControls();
         moveCamera();
         //enlarge the ground
