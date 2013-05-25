@@ -49,6 +49,13 @@ function doCameraControls() {
     }
 }
 
+function renderStats() {
+    'use strict';
+    var el = document.getElementById('stats');
+
+    el.innerHTML = 'Wins: ' + wins + ' Round: ' + rounds + ' Score: ' + scores;
+}
+
 var WallConfig =
     [
         [300, 300, 300],
@@ -96,9 +103,9 @@ var Ball = function () {
         delta = 0;
     };
 
-    this.reset = function() {
+    this.reset = function () {
         rounds += 1;
-        if(scores >= 50) {
+        if (scores >= 50) {
             scores -= 50;
         } else {
             scores = 0;
@@ -108,7 +115,7 @@ var Ball = function () {
         renderStats();
         this.mesh.position.x = 0;
         this.mesh.position.y = -400;
-    }
+    };
 };
 
 var Ground = function () {
@@ -147,12 +154,6 @@ function addWall(x, y, w) {
     var wall =  new Wall(x, y, w);
     walls.push(wall);
     scene.add(wall.mesh);
-}
-
-function renderStats() {
-    var el = document.getElementById('stats');
-
-    el.innerHTML = 'Wins: ' + wins + ' Round: ' + rounds + ' Score: ' + scores;
 }
 
 function cameraAnimation() {
@@ -356,7 +357,7 @@ var KamikazeBall3D = {
         requestAnimationFrame(KamikazeBall3D.animate);
         checkMovement(ballObj);
 
-        if(ballObj.mesh.position.y >= 400) {
+        if (ballObj.mesh.position.y >= 400) {
             wins += 1;
             scores += 100;
             ballObj.reset();
