@@ -16,9 +16,38 @@ var cameraControls = {
     moveDown  : false,
     MAX_SPEED : 5
 };
-var rounds = 1;
-var wins = 0;
-var scores = 0;
+var GameStats = {
+    rounds : 1,
+    wins   : 0,
+    score : 0,
+    el     : null,
+    render : function () {
+        'use strict';
+        this.el.innerHTML = 'Wins: ' + this.wins + ' Round: ' + this.rounds + ' Score: ' + this.score;
+    },
+    reset : function () {
+        'use strict';
+        this.rounds = 1;
+        this.wins = 0;
+        this.score = 0;
+    },
+    incScore : function (i) {
+        'use strict';
+        this.score += i;
+    },
+    clearScore : function () {
+        'use strict';
+        this.score = 0;
+    },
+    incRound : function () {
+        'use strict';
+        this.round += 1;
+    },
+    incWins : function () {
+        'use strict';
+        this.wins += 1;
+    }
+};
 
 /**
  *
@@ -49,12 +78,6 @@ function doCameraControls() {
     }
 }
 
-function renderStats() {
-    'use strict';
-    var el = document.getElementById('stats');
-
-    el.innerHTML = 'Wins: ' + wins + ' Round: ' + rounds + ' Score: ' + scores;
-}
 
 var WallConfig =
     [
@@ -104,15 +127,15 @@ var Ball = function () {
     };
 
     this.reset = function () {
-        rounds += 1;
-        if (scores >= 50) {
-            scores -= 50;
+        GameStats.incRound();
+        if (GameStats.score >= 50) {
+            GameStats.incScore(-50);
         } else {
-            scores = 0;
+            GameStats.clearScore();
         }
-        angleSpeed = 0.1 * (wins + 1);
+        angleSpeed = 0.1 * (GameStats.wins + 1);
         delta = 1;
-        renderStats();
+        GameStats.render();
         this.mesh.position.x = 0;
         this.mesh.position.y = -400;
     };
@@ -253,9 +276,7 @@ function initKeyboard() {
             cameraControls.moveDown = true;
             break;
         case 27: /*ESC*/
-            wins = 0;
-            rounds = 1;
-            scores = 0;
+            GameStats.reset();
             break;
         }
 
@@ -299,6 +320,8 @@ function initKeyboard() {
 var KamikazeBall3D = {
     init : function () {
         'use strict';
+        GameStats.el = document.getElementById('stats');
+
         var ball = new Ball(),
             spotLight,
             ambient,
@@ -339,7 +362,7 @@ var KamikazeBall3D = {
         }
 
         initKeyboard();
-        renderStats();
+        GameStats.render();
 
         renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -358,8 +381,8 @@ var KamikazeBall3D = {
         checkMovement(ballObj);
 
         if (ballObj.mesh.position.y >= 400) {
-            wins += 1;
-            scores += 100;
+            GameStats.incWins();
+            GameStats.incScore(100);
             ballObj.reset();
         }
 
