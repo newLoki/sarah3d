@@ -8,7 +8,7 @@ var controls = {
     moveLeft: false,
     moveRight: false
 };
-var angleSpeed = 0.1;
+var angleSpeedX = 0.1;
 var delta = 1;
 var cameraDelta = 1;
 var cameraControls = {
@@ -117,14 +117,14 @@ var Ball = function () {
             this.mesh.position.y = -450;
             this.halt();
         }
-        if (angleSpeed !== 0) {
-            this.mesh.rotation.x -= angleSpeed;
+        if (angleSpeedX !== 0) {
+            this.mesh.rotation.x -= angleSpeedX;
             camera.position.y += delta;
         }
     };
 
     this.halt = function () {
-        angleSpeed = 0;
+        angleSpeedX = 0;
         delta = 0;
     };
 
@@ -135,7 +135,7 @@ var Ball = function () {
         } else {
             gameStats.clearScore();
         }
-        angleSpeed = 0.1 * (gameStats.wins + 1);
+        angleSpeedX = 0.1 * (gameStats.wins + 1);
         delta = 1;
         gameStats.render();
         this.mesh.position.x = 0;
@@ -199,16 +199,18 @@ function checkMovement(obj) {
     if (controls.moveLeft) {
         if (obj.mesh.position.x > -435) {
             obj.mesh.position.x -= 5;
+            obj.mesh.rotation.z -= 0.1;
         }
     } else if (controls.moveRight) {
         if (obj.mesh.position.x < 435) {
             obj.mesh.position.x += 5;
+            obj.mesh.rotation.z += 0.1;
         }
     } else if (controls.moveForeward) {
-        angleSpeed += 0.1;
+        angleSpeedX += 0.1;
         delta += 1;
     } else if (controls.moveBackward) {
-        angleSpeed -= 0.1;
+        angleSpeedX -= 0.1;
         delta -= 1;
     }
 }
