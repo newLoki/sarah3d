@@ -140,7 +140,7 @@ var Ball = function () {
         } else {
             gameStats.clearScore();
         }
-        angleSpeedX = 0.1 * (gameStats.wins + 1);
+        angleSpeedX = 0.1;
         delta = 1;
         gameStats.render();
         this.mesh.position.x = 0;
