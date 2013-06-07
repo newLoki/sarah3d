@@ -76,11 +76,16 @@ function doCameraControls() {
 
     if (cameraControls.moveUp) {
         if (cameraDelta > -cameraControls.MAX_SPEED) {
-            cameraDelta = cameraDelta - 1;
+            if (camera.position.y < 0) {
+                cameraDelta = cameraDelta - 1;
+            }
+            console.log(camera.position.y, camera.position.z);
         }
     } else if (cameraControls.moveDown) {
         if (cameraDelta < cameraControls.MAX_SPEED) {
-            cameraDelta = cameraDelta + 1;
+            if (camera.position.y > -780) {
+                cameraDelta = cameraDelta + 1;
+            }
         }
     }
 }
@@ -327,6 +332,9 @@ function initKeyboard() {
 }
 
 var KamikazeBall3D = {
+    lastLoop: new Date,
+    frameRate: 30,
+
     init : function () {
         'use strict';
         gameStats.el = document.getElementById('stats');
@@ -358,7 +366,7 @@ var KamikazeBall3D = {
         spotLight.castShadow = true;
         spotLight.shadowMapWidth = 1024;
         spotLight.shadowMapHeight = 1024;
-        spotLight.shadowDarkness = 0.5;
+        spotLight.shadowDarkness = 0.7;
 
         scene.add(spotLight);
         scene.add(ground.mesh);
@@ -378,7 +386,7 @@ var KamikazeBall3D = {
         //enable shadow plugin
         renderer.shadowMapEnabled = true;
         //anti aliasing
-        renderer.shadowMapSoft = false;
+        renderer.shadowMapSoft = true;
         document.body.appendChild(renderer.domElement);
     },
 
@@ -386,29 +394,40 @@ var KamikazeBall3D = {
         'use strict';
         var i, o;
 
-        requestAnimationFrame(KamikazeBall3D.animate);
-        checkMovement(ballObj);
 
-        if (ballObj.mesh.position.y >= 400) {
-            gameStats.incWins();
-            gameStats.incScore(100);
-            ballObj.reset();
-        }
+        var currentLoop         = new Date;
+        var frameRate           = 1000 / (currentLoop - KamikazeBall3D.lastLoop);
+        KamikazeBall3D.lastLoop = currentLoop;
+        document.getElementById('fps').innerHTML = Math.floor(frameRate);
 
-        if (checkWallCollision(ballObj)) {
-            ballObj.reset();
-        }
-        cameraStartAnimation();
-        doCameraControls();
-        moveCamera();
-        //enlarge the ground
-        //this.offset.set(position.x / w * seaTex.repeat.x, position.y / h * seaTex.repeat.y);
-        for (i = 0; i < animatedObjects.length; i = i + 1) {
-            o = animatedObjects[i];
-            if (o.hasOwnProperty('doAnimation')) {
-                o.doAnimation();
+        setTimeout(function() {
+            requestAnimationFrame(KamikazeBall3D.animate);
+
+            checkMovement(ballObj);
+
+            if (ballObj.mesh.position.y >= 400) {
+                gameStats.incWins();
+                gameStats.incScore(100);
+                ballObj.reset();
             }
-        }
+
+            if (checkWallCollision(ballObj)) {
+                ballObj.reset();
+            }
+            cameraStartAnimation();
+            doCameraControls();
+            moveCamera();
+            //enlarge the ground
+            //this.offset.set(position.x / w * seaTex.repeat.x, position.y / h * seaTex.repeat.y);
+            for (i = 0; i < animatedObjects.length; i = i + 1) {
+                o = animatedObjects[i];
+                if (o.hasOwnProperty('doAnimation')) {
+                    o.doAnimation();
+                }
+            }
+        }, 1000 / KamikazeBall3D.frameRate);
+
+
         renderer.render(scene, camera);
     }
 };
