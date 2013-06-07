@@ -5,7 +5,7 @@ var planets = {
     sun     : {
         orbitalPeriod : 0,
         distance      : 0,
-        radius        : 66371,
+        radius        : 1392700 / 2 / 10,
         angle : 0,
         mesh : null,
         color         : 0xffff00
@@ -41,13 +41,23 @@ var planets = {
         angle : 0,
         mesh : null,
         color         : 0xff0000
-}
-};
-
-var angle = {
-    mercury : 0,
-    venus :  0,
-    earth : 0
+    },
+    jupiter : {
+        orbitalPeriod : 4332.59, // days
+        distance      : 778547200, // km
+        radius        : 69911, // km
+        angle : 0,
+        mesh : null,
+        color         : 0xaaaa00
+    },
+    saturn : {
+        orbitalPeriod : 10759.22, // days
+        distance      : 1353572956, // km
+        radius        : 60268, // km
+        angle : 0,
+        mesh : null,
+        color         : 0x444444
+    }
 };
 
 function ready() {
