@@ -63,19 +63,21 @@ function ready() {
     var scene = new THREE.Scene(),
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000),
         renderer = new THREE.WebGLRenderer(),
+        planetSpeedFactor = 5,
         planet,
         planetName,
         render = function () {
             var planet,
                 planetName;
             for (planetName in planets) {
-                if ('sun' === planetName) {
-                    continue;
+                if (planets.hasOwnProperty(planetName)) {
+                    if ('sun' !== planetName) {
+                        planet = planets[planetName];
+                        planet.angle += 1 / planet.orbitalPeriod * planetSpeedFactor;
+                        planet.mesh.position.x = planet.distance / planets.earth.distance * 10 * 2 * Math.cos(planet.angle);
+                        planet.mesh.position.z = planet.distance / planets.earth.distance * 10 * 2 * Math.sin(planet.angle);
+                    }
                 }
-                planet = planets[planetName];
-                planet.angle += 1 / planet.orbitalPeriod * 3;
-                planet.mesh.position.x = planet.distance / planets.earth.distance * 10 * 2 * Math.cos(planet.angle);
-                planet.mesh.position.z = planet.distance / planets.earth.distance * 10 * 2 * Math.sin(planet.angle);
             }
 
             requestAnimationFrame(render);
@@ -84,14 +86,15 @@ function ready() {
         };
 
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth - 50, window.innerHeight - 50);
     document.body.appendChild(renderer.domElement);
 
     for (planetName in planets) {
-        planet = planets[planetName];
-        planet.mesh = new THREE.Mesh(new THREE.SphereGeometry(planet.radius * 2 / planets.sun.radius, 10, 10), new THREE.MeshBasicMaterial({color : planet.color, wireframe : true }));
-        planet.mesh.position.x = planet.distance / planets.earth.distance * 10 * 2;
-        scene.add(planet.mesh);
+        if (planets.hasOwnProperty(planetName)) {
+            planet = planets[planetName];
+            planet.mesh = new THREE.Mesh(new THREE.SphereGeometry(planet.radius * 2 / planets.sun.radius, 10, 10), new THREE.MeshBasicMaterial({color : planet.color, wireframe : true }));
+            scene.add(planet.mesh);
+        }
     }
 
     camera.position.x = 0;
