@@ -145,7 +145,7 @@ var Ball = function () {
         } else {
             gameStats.clearScore();
         }
-        angleSpeedX = 0.1 * (gameStats.wins + 1);
+        angleSpeedX = 0.1;
         delta = 1;
         gameStats.render();
         this.mesh.position.x = 0;
@@ -166,6 +166,21 @@ var Ground = function () {
     this.mesh.receiveShadow = true;
     this.mesh.castShadow = false;
 //    this.mesh.rotation.x = 90;
+};
+
+var Cylinder = function () {
+    'use strict';
+
+    this.ground = new THREE.CylinderGeometry(500, 500, 1000, 100, 100);
+    this.material = new THREE.MeshPhongMaterial({
+        map : THREE.ImageUtils.loadTexture("images/stone_ground.jpg"),
+        shading: THREE.SmoothShading
+    });
+    this.mesh = new THREE.Mesh(this.ground, this.material);
+    this.mesh.position.z = -500;
+    this.mesh.receiveShadow = true;
+    this.mesh.castShadow = false;
+    this.mesh.rotation.z = Math.PI / 2;
 };
 
 var Wall = function (x, y, w) {
