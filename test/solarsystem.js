@@ -1,6 +1,3 @@
-
-var scene, renderer, camera;
-
 var planets = {
     sun     : {
         orbitalPeriod : 0,
@@ -63,16 +60,36 @@ var planets = {
 function ready() {
     'use strict';
 
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    var renderer = new THREE.WebGLRenderer();
+    var scene = new THREE.Scene(),
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000),
+        renderer = new THREE.WebGLRenderer(),
+        planet,
+        planetName,
+        render = function () {
+            var planet,
+                planetName;
+            for (planetName in planets) {
+                if ('sun' === planetName) {
+                    continue;
+                }
+                planet = planets[planetName];
+                planet.angle += 1 / planet.orbitalPeriod * 3;
+                planet.mesh.position.x = planet.distance / planets.earth.distance * 10 * 2 * Math.cos(planet.angle);
+                planet.mesh.position.z = planet.distance / planets.earth.distance * 10 * 2 * Math.sin(planet.angle);
+            }
+
+            requestAnimationFrame(render);
+
+            renderer.render(scene, camera);
+        };
+
+
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    var planetName;
     for (planetName in planets) {
-        var planet = planets[planetName];
-        planet.mesh = new THREE.Mesh(new THREE.SphereGeometry(planet.radius * 2/ planets.sun.radius, 10, 10), new THREE.MeshBasicMaterial({color : planet.color, wireframe : true }));
+        planet = planets[planetName];
+        planet.mesh = new THREE.Mesh(new THREE.SphereGeometry(planet.radius * 2 / planets.sun.radius, 10, 10), new THREE.MeshBasicMaterial({color : planet.color, wireframe : true }));
         planet.mesh.position.x = planet.distance / planets.earth.distance * 10 * 2;
         scene.add(planet.mesh);
     }
@@ -80,27 +97,9 @@ function ready() {
     camera.position.x = 0;
     camera.position.y = 16;
     camera.position.z = 25;
-    camera.rotation.x = - Math.PI / 6;
-    var render = function () {
-        var planetName;
-        for (planetName in planets) {
-            if ('sun' === planetName) {
-                continue;
-            }
-            var planet = planets[planetName];
-            planet.angle += 1 / planet.orbitalPeriod * 3;
-            planet.mesh.position.x = planet.distance / planets.earth.distance * 10 * 2 * Math.cos(planet.angle);
-            planet.mesh.position.z = planet.distance / planets.earth.distance * 10 * 2 * Math.sin(planet.angle);
+    camera.rotation.x = -Math.PI / 6;
 
-        }
-
-        requestAnimationFrame(render);
-
-        renderer.render(scene, camera);
-    };
     render();
-
-
 }
 
 $(document).ready(ready());
