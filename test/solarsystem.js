@@ -63,6 +63,7 @@ function ready() {
     var scene = new THREE.Scene(),
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000),
         renderer = new THREE.WebGLRenderer(),
+        controls = new THREE.TrackballControls(camera),
         stats,
         planetSpeedFactor = 5,
         planet,
@@ -82,6 +83,7 @@ function ready() {
             }
 
             requestAnimationFrame(render);
+            controls.update();
 
             renderer.render(scene, camera);
             stats.update();
