@@ -63,6 +63,7 @@ function ready() {
     var scene = new THREE.Scene(),
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000),
         renderer = new THREE.WebGLRenderer(),
+        stats,
         planetSpeedFactor = 5,
         planet,
         planetName,
@@ -83,11 +84,17 @@ function ready() {
             requestAnimationFrame(render);
 
             renderer.render(scene, camera);
+            stats.update();
         };
 
 
     renderer.setSize(window.innerWidth - 50, window.innerHeight - 50);
     document.body.appendChild(renderer.domElement);
+
+    stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
 
     for (planetName in planets) {
         if (planets.hasOwnProperty(planetName)) {
