@@ -1,3 +1,63 @@
+var astroParams = {
+    timeFactor : 1,
+
+    slowDown : function () {
+        'use strict';
+        this.timeFactor /= 1.01;
+        if (this.timeFactor < 0.01) {
+            this.timeFactor = 0.01;
+        }
+    },
+
+    speedUp : function () {
+        'use strict';
+        this.timeFactor *= 1.01;
+        if (this.timeFactor > 100) {
+            this.timeFactor = 100;
+        }
+    }
+};
+
+var AstroControl = function () {
+    'use strict';
+    this.isRunning = true;
+    this.speedUpPressed = false;
+    this.slowDownPressed = false;
+
+    this.toggle = function () {
+        this.isRunning = !this.isRunning;
+    };
+
+    this.initKeyboard = function () {
+        var me = this;
+
+        document.addEventListener('keydown', function (evt) {
+            switch (evt.keyCode) {
+            case 188: /* , */
+                me.speedUpPressed = true;
+                break;
+            case 190: /* . */
+                me.slowDownPressed = true;
+                break;
+            }
+        }, false);
+
+        document.addEventListener('keyup', function (evt) {
+            switch (evt.keyCode) {
+            case 188: /* , */
+                me.speedUpPressed = false;
+                break;
+            case 190: /* . */
+                me.slowDownPressed = false;
+                break;
+            case 32: /*Space*/
+                me.toggle();
+                break;
+            }
+        }, false);
+    };
+};
+
 var AstronomicalObject = function (radius, rotationSpeed, mesh, color, satellites) {
     'use strict';
     this.radius = radius; // km
@@ -33,10 +93,10 @@ var AstronomicalObject = function (radius, rotationSpeed, mesh, color, satellite
     this.move = function () {
         var i, satellite, astronomicalObject;
 
-        this.mesh.rotation.y +=  this.rotationSpeed / 200;
+        this.mesh.rotation.y +=  this.rotationSpeed / 100 * astroParams.timeFactor;
         for (i = 0; i < this.satellites.length; i += 1) {
             satellite = this.satellites[i];
-            satellite.angle += 1 / satellite.orbitalPeriod;
+            satellite.angle += 1 / satellite.orbitalPeriod * astroParams.timeFactor;
 
             astronomicalObject = satellite.astronomicalObject;
             astronomicalObject.mesh.position.x = this.mesh.position.x + satellite.distance * Math.cos(satellite.angle);
@@ -55,7 +115,7 @@ var SatelliteObject = function (astronomicalObject, orbitalPeriod, distance, ang
     this.angle = angle;
 };
 
-var apollo13 = new AstronomicalObject(0.5, 10, null, 'pink', [], 0);
+var apollo13 = new AstronomicalObject(0.2, 10, null, 'pink', [], 0);
 var moonMesh = new THREE.Mesh(
     new THREE.SphereGeometry(2, 32, 32),
     new THREE.MeshPhongMaterial(
@@ -66,7 +126,7 @@ var moonMesh = new THREE.Mesh(
         }
     )
 );
-var moon = new AstronomicalObject(2, 1 / 0.5, moonMesh, 'black', [new SatelliteObject(apollo13, 10, 3, 0)]);
+var moon = new AstronomicalObject(2, -1, moonMesh, 'black', [new SatelliteObject(apollo13, 10, 3, 0)]);
 var earthMesh = new THREE.Mesh(
     new THREE.SphereGeometry(5, 64, 64),
     new THREE.MeshPhongMaterial(
@@ -103,11 +163,22 @@ function ready() {
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000),
         renderer = new THREE.WebGLRenderer(),
         controls = new THREE.TrackballControls(camera),
+        astroControl = new AstroControl(),
         ambient = new THREE.AmbientLight(0xffffff),
         stats,
         render = function () {
 
-            sun.move();
+            if (astroControl.isRunning) {
+                sun.move();
+            }
+
+            if (astroControl.slowDownPressed) {
+                astroParams.slowDown();
+            }
+            if (astroControl.speedUpPressed) {
+                astroParams.speedUp();
+            }
+
 
             requestAnimationFrame(render);
             controls.update();
@@ -135,6 +206,7 @@ function ready() {
     camera.position.z = 100;
     camera.rotation.x = -Math.PI / 6;
 
+    astroControl.initKeyboard();
     render();
 }
 
