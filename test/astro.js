@@ -1,3 +1,9 @@
+var Astro = {
+    Const : {
+        AE : 149597870700 // m, distance between sun and earth
+    }
+};
+
 var astroParams = {
     timeFactor : 1,
 
@@ -77,7 +83,6 @@ var AstronomicalObject = function (radius, rotationSpeed, mesh, color, satellite
         for (i = 0; i < this.satellites.length; i += 1) {
             satellite = this.satellites[i];
             satellite.astronomicalObject.initMesh(scale);
-            satellite.astronomicalObject.mesh.position.x = satellite.distance;
         }
     };
 
@@ -130,15 +135,15 @@ var AstroMesh = function (radius, image) {
 };
 
 var apollo13 = new AstronomicalObject(0.2, 10, null, 'pink', []);
-var moon = new AstronomicalObject(2, -1, new AstroMesh(2, "images/ear1ccc2.jpg"), 'black', [new SatelliteObject(apollo13, 10, 3, 0)]);
-var earth = new AstronomicalObject(5, 1, new AstroMesh(5, "images/earth_atmos_2048.jpg"), 'blue', [new SatelliteObject(moon, 28, 10, 0)]);
+var moon = new AstronomicalObject(2, -1, new AstroMesh(2, "images/ear1ccc2.jpg"), 'black', [new SatelliteObject(apollo13, 10, 384400 / Astro.Const.AE * 2000000, 0)]);
+var earth = new AstronomicalObject(5, 1, new AstroMesh(5, "images/earth_atmos_2048.jpg"), 'blue', [new SatelliteObject(moon, 28, 384400 / Astro.Const.AE * 6000000, 0)]);
 earth.mesh.rotation.x =  23 / 180 * Math.PI;
 var venus = new AstronomicalObject(5, -1, new AstroMesh(5, "images/ven0mss2.jpg"), 'red', []);
 var phobos = new AstronomicalObject(0.5, 1 / 0.5, null, 'green', []);
 var deimos = new AstronomicalObject(0.5, 1 / 0.5, null, 'gray', []);
 var mars = new AstronomicalObject(3, 1, new AstroMesh(3, "images/mar0kuu2.jpg"), 'red', [
-    new SatelliteObject(phobos, 7, 6, 0),
-    new SatelliteObject(deimos, 14, 10, 0)
+    new SatelliteObject(phobos, 0.3189 * 10, 9378 / Astro.Const.AE * 60000000, 0),
+    new SatelliteObject(deimos, 1.262 * 10, 23459 / Astro.Const.AE * 60000000, 0)
 ]);
 var sun = new AstronomicalObject(
     10,
@@ -146,9 +151,9 @@ var sun = new AstronomicalObject(
     null,
     'yellow',
     [
-        new SatelliteObject(venus, 224.701, 20, 0),
-        new SatelliteObject(earth, 365, 40, 0),
-        new SatelliteObject(mars, 700, 80, 0)
+        new SatelliteObject(venus, 224.701, 0.723 * 60, 0),
+        new SatelliteObject(earth, 365.256, 60, 0),
+        new SatelliteObject(mars, 686.980, 1.524 * 60, 0)
     ]
 );
 
