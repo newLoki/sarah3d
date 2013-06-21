@@ -115,43 +115,27 @@ var SatelliteObject = function (astronomicalObject, orbitalPeriod, distance, ang
     this.angle = angle;
 };
 
+var AstroMesh = function (radius, image) {
+    'use strict';
+    return new THREE.Mesh(
+        new THREE.SphereGeometry(radius, 32, 32),
+        new THREE.MeshPhongMaterial(
+            {
+                map   : THREE.ImageUtils.loadTexture(image),
+                shading: THREE.SmoothShading,
+                wireframe : false
+            }
+        )
+    );
+};
+
 var apollo13 = new AstronomicalObject(0.2, 10, null, 'pink', [], 0);
-var moonMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(2, 32, 32),
-    new THREE.MeshPhongMaterial(
-        {
-            map   : THREE.ImageUtils.loadTexture("images/ear1ccc2.jpg"),
-            shading: THREE.SmoothShading,
-            wireframe : false
-        }
-    )
-);
-var moon = new AstronomicalObject(2, -1, moonMesh, 'black', [new SatelliteObject(apollo13, 10, 3, 0)]);
-var earthMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(5, 64, 64),
-    new THREE.MeshPhongMaterial(
-        {
-            map   : THREE.ImageUtils.loadTexture("images/earth_atmos_2048.jpg"),
-            shading: THREE.SmoothShading,
-            wireframe : false
-        }
-    )
-);
-var earth = new AstronomicalObject(5, 1, earthMesh, 'blue', [new SatelliteObject(moon, 28, 10, 0)]);
+var moon = new AstronomicalObject(2, -1, new AstroMesh(2, "images/ear1ccc2.jpg"), 'black', [new SatelliteObject(apollo13, 10, 3, 0)]);
+var earth = new AstronomicalObject(5, 1, new AstroMesh(5, "images/earth_atmos_2048.jpg"), 'blue', [new SatelliteObject(moon, 28, 10, 0)]);
 earth.mesh.rotation.x =  23 / 180 * Math.PI;
-var phobos = new AstronomicalObject(1, 1 / 0.5, null, 'green', []);
-var deimos = new AstronomicalObject(1, 1 / 0.5, null, 'gray', []);
-var marsMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(4, 64, 64),
-    new THREE.MeshPhongMaterial(
-        {
-            map   : THREE.ImageUtils.loadTexture("images/mar0kuu2.jpg"),
-            shading: THREE.SmoothShading,
-            wireframe : false
-        }
-    )
-);
-var mars = new AstronomicalObject(4, 1, marsMesh, 'red', [
+var phobos = new AstronomicalObject(0.5, 1 / 0.5, null, 'green', []);
+var deimos = new AstronomicalObject(0.5, 1 / 0.5, null, 'gray', []);
+var mars = new AstronomicalObject(3, 1, new AstroMesh(3, "images/mar0kuu2.jpg"), 'red', [
     new SatelliteObject(phobos, 7, 6, 0),
     new SatelliteObject(deimos, 14, 10, 0)
 ]);
