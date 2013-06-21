@@ -129,10 +129,11 @@ var AstroMesh = function (radius, image) {
     );
 };
 
-var apollo13 = new AstronomicalObject(0.2, 10, null, 'pink', [], 0);
+var apollo13 = new AstronomicalObject(0.2, 10, null, 'pink', []);
 var moon = new AstronomicalObject(2, -1, new AstroMesh(2, "images/ear1ccc2.jpg"), 'black', [new SatelliteObject(apollo13, 10, 3, 0)]);
 var earth = new AstronomicalObject(5, 1, new AstroMesh(5, "images/earth_atmos_2048.jpg"), 'blue', [new SatelliteObject(moon, 28, 10, 0)]);
 earth.mesh.rotation.x =  23 / 180 * Math.PI;
+var venus = new AstronomicalObject(5, -1, new AstroMesh(5, "images/ven0mss2.jpg"), 'red', []);
 var phobos = new AstronomicalObject(0.5, 1 / 0.5, null, 'green', []);
 var deimos = new AstronomicalObject(0.5, 1 / 0.5, null, 'gray', []);
 var mars = new AstronomicalObject(3, 1, new AstroMesh(3, "images/mar0kuu2.jpg"), 'red', [
@@ -145,6 +146,7 @@ var sun = new AstronomicalObject(
     null,
     'yellow',
     [
+        new SatelliteObject(venus, 224.701, 20, 0),
         new SatelliteObject(earth, 365, 40, 0),
         new SatelliteObject(mars, 700, 80, 0)
     ]
@@ -172,7 +174,6 @@ function ready() {
             if (astroControl.speedUpPressed) {
                 astroParams.speedUp();
             }
-
 
             requestAnimationFrame(render);
             controls.update();
