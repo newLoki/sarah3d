@@ -120,7 +120,7 @@ var moonMesh = new THREE.Mesh(
     new THREE.SphereGeometry(2, 32, 32),
     new THREE.MeshPhongMaterial(
         {
-            map   : THREE.ImageUtils.loadTexture("images/moon.png"),
+            map   : THREE.ImageUtils.loadTexture("images/ear1ccc2.jpg"),
             shading: THREE.SmoothShading,
             wireframe : false
         }
@@ -141,7 +141,17 @@ var earth = new AstronomicalObject(5, 1, earthMesh, 'blue', [new SatelliteObject
 earth.mesh.rotation.x =  23 / 180 * Math.PI;
 var phobos = new AstronomicalObject(1, 1 / 0.5, null, 'green', []);
 var deimos = new AstronomicalObject(1, 1 / 0.5, null, 'gray', []);
-var mars = new AstronomicalObject(4, 1, null, 'red', [
+var marsMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(4, 64, 64),
+    new THREE.MeshPhongMaterial(
+        {
+            map   : THREE.ImageUtils.loadTexture("images/mar0kuu2.jpg"),
+            shading: THREE.SmoothShading,
+            wireframe : false
+        }
+    )
+);
+var mars = new AstronomicalObject(4, 1, marsMesh, 'red', [
     new SatelliteObject(phobos, 7, 6, 0),
     new SatelliteObject(deimos, 14, 10, 0)
 ]);
