@@ -55,10 +55,20 @@ var SatelliteObject = function (astronomicalObject, orbitalPeriod, distance, ang
     this.angle = angle;
 };
 
-var apollo13 = new AstronomicalObject(0.5, 10, null, 'pink', []);
-var moon = new AstronomicalObject(2, 1 / 0.5, null, 'black', [new SatelliteObject(apollo13, 10, 3, 0)]);
+var apollo13 = new AstronomicalObject(0.5, 10, null, 'pink', [], 0);
+var moonMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(2, 32, 32),
+    new THREE.MeshPhongMaterial(
+        {
+            map   : THREE.ImageUtils.loadTexture("images/moon.png"),
+            shading: THREE.SmoothShading,
+            wireframe : false
+        }
+    )
+);
+var moon = new AstronomicalObject(2, 1 / 0.5, moonMesh, 'black', [new SatelliteObject(apollo13, 10, 3, 0)]);
 var earthMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(5, 10, 10),
+    new THREE.SphereGeometry(5, 64, 64),
     new THREE.MeshPhongMaterial(
         {
             map   : THREE.ImageUtils.loadTexture("images/earth_atmos_2048.jpg"),
@@ -68,6 +78,7 @@ var earthMesh = new THREE.Mesh(
     )
 );
 var earth = new AstronomicalObject(5, 1, earthMesh, 'blue', [new SatelliteObject(moon, 28, 10, 0)]);
+earth.mesh.rotation.x =  23 / 180 * Math.PI;
 var phobos = new AstronomicalObject(1, 1 / 0.5, null, 'green', []);
 var deimos = new AstronomicalObject(1, 1 / 0.5, null, 'gray', []);
 var mars = new AstronomicalObject(4, 1, null, 'red', [
@@ -92,6 +103,7 @@ function ready() {
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000),
         renderer = new THREE.WebGLRenderer(),
         controls = new THREE.TrackballControls(camera),
+        ambient = new THREE.AmbientLight(0xffffff),
         stats,
         render = function () {
 
@@ -113,7 +125,6 @@ function ready() {
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
 
-    var ambient = new THREE.AmbientLight(0xffffff);
     scene.add(ambient);
 
     sun.initMesh(1);
