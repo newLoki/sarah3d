@@ -1,11 +1,15 @@
 var Astro = {
     Const : {
-        AE : 149597870700 // m, distance between sun and earth
+        AE           : 149597870700, // m, distance between sun and earth
+        YEAR         : 365.256, // d year on earth
+        EARTH_RADIUS : 6378.15 // km
     }
 };
 
 var astroParams = {
     timeFactor : 1,
+    distanceScale : 1,
+    radiusScale : 1,
 
     slowDown : function () {
         'use strict';
@@ -21,6 +25,38 @@ var astroParams = {
         if (this.timeFactor > 100) {
             this.timeFactor = 100;
         }
+    },
+
+    distanceScaleUp : function () {
+        'use strict';
+        this.distanceScale *= 1.01;
+        if (this.distanceScale > 2) {
+            this.distanceScale = 2;
+        }
+    },
+
+    distanceScaleDown : function () {
+        'use strict';
+        this.distanceScale /= 1.01;
+        if (this.distanceScale < 0.01) {
+            this.distanceScale = 0.01;
+        }
+    },
+
+    radiusScaleUp : function () {
+        'use strict';
+        this.radiusScale *= 1.01;
+        if (this.radiusScale > 2) {
+            this.radiusScale = 2;
+        }
+    },
+
+    radiusScaleDown : function () {
+        'use strict';
+        this.radiusScale /= 1.01;
+        if (this.radiusScale < 0.01) {
+            this.radiusScale = 0.01;
+        }
     }
 };
 
@@ -29,6 +65,10 @@ var AstroControl = function () {
     this.isRunning = true;
     this.speedUpPressed = false;
     this.slowDownPressed = false;
+    this.distanceScaleDownPressed = false;
+    this.distanceScaleUpPressed = false;
+    this.radiusScaleDownPressed = false;
+    this.radiusScaleUpPressed = false;
 
     this.toggle = function () {
         this.isRunning = !this.isRunning;
@@ -45,6 +85,18 @@ var AstroControl = function () {
             case 190: /* . */
                 me.slowDownPressed = true;
                 break;
+            case 75: /* k */
+                me.distanceScaleDownPressed = true;
+                break;
+            case 76: /* l */
+                me.distanceScaleUpPressed = true;
+                break;
+            case 73: /* i */
+                me.radiusScaleDownPressed = true;
+                break;
+            case 79: /* o */
+                me.radiusScaleUpPressed = true;
+                break;
             }
         }, false);
 
@@ -58,6 +110,18 @@ var AstroControl = function () {
                 break;
             case 32: /*Space*/
                 me.toggle();
+                break;
+            case 75: /* k */
+                me.distanceScaleDownPressed = false;
+                break;
+            case 76: /* l */
+                me.distanceScaleUpPressed = false;
+                break;
+            case 73: /* i */
+                me.radiusScaleDownPressed = false;
+                break;
+            case 79: /* o */
+                me.radiusScaleUpPressed = false;
                 break;
             }
         }, false);
@@ -76,7 +140,7 @@ var AstronomicalObject = function (radius, rotationSpeed, mesh, color, satellite
         var i, satellite;
         if (mesh === null) {
             this.mesh = new THREE.Mesh(
-                new THREE.SphereGeometry(this.radius / scale, 32, 32),
+                new THREE.SphereGeometry(this.radius * astroParams.radiusScale, 32, 32),
                 new THREE.MeshBasicMaterial({color : this.color, wireframe : true })
             );
         }
@@ -104,8 +168,8 @@ var AstronomicalObject = function (radius, rotationSpeed, mesh, color, satellite
             satellite.angle += 1 / satellite.orbitalPeriod * astroParams.timeFactor;
 
             astronomicalObject = satellite.astronomicalObject;
-            astronomicalObject.mesh.position.x = this.mesh.position.x + satellite.distance * Math.cos(satellite.angle);
-            astronomicalObject.mesh.position.z = this.mesh.position.z + satellite.distance * Math.sin(satellite.angle);
+            astronomicalObject.mesh.position.x = this.mesh.position.x + satellite.distance * astroParams.distanceScale * Math.cos(satellite.angle);
+            astronomicalObject.mesh.position.z = this.mesh.position.z + satellite.distance * astroParams.distanceScale * Math.sin(satellite.angle);
 
             astronomicalObject.move();
         }
@@ -123,7 +187,7 @@ var SatelliteObject = function (astronomicalObject, orbitalPeriod, distance, ang
 var AstroMesh = function (radius, image) {
     'use strict';
     return new THREE.Mesh(
-        new THREE.SphereGeometry(radius, 32, 32),
+        new THREE.SphereGeometry(radius * astroParams.radiusScale, 32, 32),
         new THREE.MeshPhongMaterial(
             {
                 map   : THREE.ImageUtils.loadTexture(image),
@@ -135,25 +199,25 @@ var AstroMesh = function (radius, image) {
 };
 
 var apollo13 = new AstronomicalObject(0.2, 10, null, 'pink', []);
-var moon = new AstronomicalObject(2, -1, new AstroMesh(2, "images/ear1ccc2.jpg"), 'black', [new SatelliteObject(apollo13, 10, 384400 / Astro.Const.AE * 2000000, 0)]);
-var earth = new AstronomicalObject(5, 1, new AstroMesh(5, "images/earth_atmos_2048.jpg"), 'blue', [new SatelliteObject(moon, 28, 384400 / Astro.Const.AE * 6000000, 0)]);
+var moon = new AstronomicalObject(3474.2 / Astro.Const.EARTH_RADIUS, -1, new AstroMesh(3474.2 / Astro.Const.EARTH_RADIUS, "images/ear1ccc2.jpg"), 'black', [new SatelliteObject(apollo13, 10, 384400 / Astro.Const.AE * 2000000, 0)]);
+var earth = new AstronomicalObject(1, 1, new AstroMesh(1, "images/earth_atmos_2048.jpg"), 'blue', [new SatelliteObject(moon, 28, 384400 / Astro.Const.AE * 6000000, 0)]);
 earth.mesh.rotation.x =  23 / 180 * Math.PI;
-var venus = new AstronomicalObject(5, -1, new AstroMesh(5, "images/ven0mss2.jpg"), 'red', []);
-var phobos = new AstronomicalObject(0.5, 1 / 0.5, null, 'green', []);
-var deimos = new AstronomicalObject(0.5, 1 / 0.5, null, 'gray', []);
-var mars = new AstronomicalObject(3, 1, new AstroMesh(3, "images/mar0kuu2.jpg"), 'red', [
-    new SatelliteObject(phobos, 0.3189 * 10, 9378 / Astro.Const.AE * 60000000, 0),
-    new SatelliteObject(deimos, 1.262 * 10, 23459 / Astro.Const.AE * 60000000, 0)
+var venus = new AstronomicalObject(0.9488, -1, new AstroMesh(0.9488, "images/ven0mss2.jpg"), 'red', []);
+var phobos = new AstronomicalObject(0.1, 1 / 0.5, null, 'green', []);
+var deimos = new AstronomicalObject(0.1, 1 / 0.5, null, 'gray', []);
+var mars = new AstronomicalObject(0.5326, 1, new AstroMesh(0.5326, "images/mar0kuu2.jpg"), 'red', [
+    new SatelliteObject(phobos, 0.3189 * 10, 9378 / Astro.Const.AE, 0),
+    new SatelliteObject(deimos, 1.262 * 10, 23459 / Astro.Const.AE, 0)
 ]);
 var sun = new AstronomicalObject(
-    10,
+    1392700 / (2 * Astro.Const.EARTH_RADIUS),
     1,
     null,
     'yellow',
     [
-        new SatelliteObject(venus, 224.701, 0.723 * 60, 0),
-        new SatelliteObject(earth, 365.256, 60, 0),
-        new SatelliteObject(mars, 686.980, 1.524 * 60, 0)
+        new SatelliteObject(venus, 224.701, 0.723 * 200, 0),
+        new SatelliteObject(earth, 365.256, 200, 0),
+        new SatelliteObject(mars, 686.980, 1.524 * 200, 0)
     ]
 );
 
@@ -167,10 +231,11 @@ function ready() {
         astroControl = new AstroControl(),
         ambient = new THREE.AmbientLight(0xffffff),
         stats,
+        astroObject = sun,
         render = function () {
 
             if (astroControl.isRunning) {
-                sun.move();
+                astroObject.move();
             }
 
             if (astroControl.slowDownPressed) {
@@ -178,6 +243,18 @@ function ready() {
             }
             if (astroControl.speedUpPressed) {
                 astroParams.speedUp();
+            }
+            if (astroControl.distanceScaleDownPressed) {
+                astroParams.distanceScaleDown();
+            }
+            if (astroControl.distanceScaleUpPressed) {
+                astroParams.distanceScaleUp();
+            }
+            if (astroControl.radiusScaleDownPressed) {
+                astroParams.radiusScaleDown();
+            }
+            if (astroControl.radiusScaleUpPressed) {
+                astroParams.radiusScaleUp();
             }
 
             requestAnimationFrame(render);
@@ -198,12 +275,12 @@ function ready() {
 
     scene.add(ambient);
 
-    sun.initMesh(1);
-    sun.addToScene(scene);
+    astroObject.initMesh(1);
+    astroObject.addToScene(scene);
 
     camera.position.x = 0;
     camera.position.y = 64;
-    camera.position.z = 100;
+    camera.position.z = 300;
     camera.rotation.x = -Math.PI / 6;
 
     astroControl.initKeyboard();
