@@ -128,22 +128,24 @@ var AstroControl = function () {
     };
 };
 
-var AstronomicalObject = function (radius, rotationSpeed, mesh, color, satellites) {
+var AstronomicalObject = function (properties) {
     'use strict';
-    this.radius = radius; // km
-    this.rotationSpeed = rotationSpeed; // d
-    this.mesh = mesh;
-    this.color = color;
-    this.satellites = satellites;
+    this.radius = properties.radius; // km
+    this.rotationSpeed = properties.rotationSpeed; // d
+    this.mesh = properties.mesh;
+    this.color = properties.color;
+    this.satellites = properties.satellites;
+    this.axialTilt = properties.hasOwnProperty('axialTilt') ? properties.axialTilt : 0;
 
     this.initMesh = function (scale) {
         var i, satellite;
-        if (mesh === null) {
+        if (this.mesh === null) {
             this.mesh = new THREE.Mesh(
                 new THREE.SphereGeometry(this.radius * astroParams.radiusScale, 32, 32),
                 new THREE.MeshBasicMaterial({color : this.color, wireframe : true })
             );
         }
+        this.mesh.rotation.x =  this.axialTilt;
         for (i = 0; i < this.satellites.length; i += 1) {
             satellite = this.satellites[i];
             satellite.astronomicalObject.initMesh(scale);
@@ -202,27 +204,85 @@ var AstroMesh = function (radius, image) {
     );
 };
 
-var apollo13 = new AstronomicalObject(0.2, 10, null, 'pink', []);
-var moon = new AstronomicalObject(3474.2 / Astro.Const.EARTH_RADIUS, -1, new AstroMesh(3474.2 / Astro.Const.EARTH_RADIUS, "images/ear1ccc2.jpg"), 'black', [new SatelliteObject(apollo13, 10, 384400 / Astro.Const.AE * 2000000, 0)]);
-var earth = new AstronomicalObject(1, 1, new AstroMesh(1, "images/earth_atmos_2048.jpg"), 'blue', [new SatelliteObject(moon, 28, 384400 / Astro.Const.AE * 6000000, 0)]);
-earth.mesh.rotation.x =  23 / 180 * Math.PI;
-var venus = new AstronomicalObject(0.9488, -1, new AstroMesh(0.9488, "images/ven0mss2.jpg"), 'red', []);
-var phobos = new AstronomicalObject(0.1, 1 / 0.5, null, 'green', []);
-var deimos = new AstronomicalObject(0.1, 1 / 0.5, null, 'gray', []);
-var mars = new AstronomicalObject(0.5326, 1, new AstroMesh(0.5326, "images/mar0kuu2.jpg"), 'red', [
-    new SatelliteObject(phobos, 0.3189 * 10, 9378 / Astro.Const.AE, 0),
-    new SatelliteObject(deimos, 1.262 * 10, 23459 / Astro.Const.AE, 0)
-]);
+var apollo13 = new AstronomicalObject(
+    {
+        radius        : 0.2,
+        rotationSpeed : 10,
+        mesh          : null,
+        color         : 'pink',
+        satellites    : []
+    }
+);
+var moon = new AstronomicalObject(
+    {
+        radius        : 3474.2 / Astro.Const.EARTH_RADIUS,
+        rotationSpeed : -1,
+        mesh          : new AstroMesh(3474.2 / Astro.Const.EARTH_RADIUS, "images/ear1ccc2.jpg"),
+        color         : 'black',
+        satellites    : [new SatelliteObject(apollo13, 10, 384400 / Astro.Const.AE * 2000000, 0)]
+    }
+);
+var earth = new AstronomicalObject(
+    {
+        radius        : 1,
+        rotationSpeed : 1,
+        axialTilt     : 23 / 180 * Math.PI,
+        mesh          : new AstroMesh(1, "images/earth_atmos_2048.jpg"),
+        color         : 'blue',
+        satellites    : [new SatelliteObject(moon, 28, 384400 / Astro.Const.AE * 6000000, 0)]
+    }
+);
+var venus = new AstronomicalObject(
+    {
+        radius        : 0.9488,
+        rotationSpeed : -1,
+        mesh          : new AstroMesh(0.9488, "images/ven0mss2.jpg"),
+        color         : 'red',
+        satellites    : []
+    }
+);
+var phobos = new AstronomicalObject(
+    {
+        radius        : 0.1,
+        rotationSpeed : 1 / 0.5,
+        mesh          : null,
+        color         : 'green',
+        satellites    : []
+    }
+);
+var deimos = new AstronomicalObject(
+    {
+        radius        : 0.1,
+        rotationSpeed : 1 / 0.5,
+        mesh          : null,
+        color         : 'gray',
+        satellites    : []
+    }
+);
+var mars = new AstronomicalObject(
+    {
+        radius        : 0.5326,
+        rotationSpeed : 1,
+        mesh          : new AstroMesh(0.5326, "images/mar0kuu2.jpg"),
+        color         : 'red',
+        satellites    : [
+            new SatelliteObject(phobos, 0.3189 * 10, 9378 / Astro.Const.AE, 0),
+            new SatelliteObject(deimos, 1.262 * 10, 23459 / Astro.Const.AE, 0)
+        ]
+    }
+);
 var sun = new AstronomicalObject(
-    1392700 / (2 * Astro.Const.EARTH_RADIUS),
-    1,
-    null,
-    'yellow',
-    [
-        new SatelliteObject(venus, 224.701, 0.723 * 200, 0),
-        new SatelliteObject(earth, 365.256, 200, 0),
-        new SatelliteObject(mars, 686.980, 1.524 * 200, 0)
-    ]
+    {
+        radius        : 1392700 / (2 * Astro.Const.EARTH_RADIUS),
+        rotationSpeed : 1,
+        mesh          : null,
+        color         : 'yellow',
+        satellites    : [
+            new SatelliteObject(venus, 224.701, 0.723 * 200, 0),
+            new SatelliteObject(earth, 365.256, 200, 0),
+            new SatelliteObject(mars, 686.980, 1.524 * 200, 0)
+        ]
+    }
 );
 
 function ready() {
