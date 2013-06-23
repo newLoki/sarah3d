@@ -131,7 +131,7 @@ var AstroControl = function () {
 var AstroMesh = function (radius, image) {
     'use strict';
     return new THREE.Mesh(
-        new THREE.SphereGeometry(radius * astroParams.radiusScale, 32, 32),
+        new THREE.SphereGeometry(radius * astroParams.radiusScale / Astro.Const.AE * 10000, 32, 32),
         new THREE.MeshPhongMaterial(
             {
                 map   : THREE.ImageUtils.loadTexture(image),
@@ -149,15 +149,16 @@ var AstronomicalObject = function (properties) {
     this.mesh = properties.hasOwnProperty('mesh') ? properties.mesh : null;
     this.color = properties.color;
     this.texture = properties.hasOwnProperty('texture') ? properties.texture : null;
-    this.satellites = properties.satellites;
+    this.satellites =  properties.hasOwnProperty('satellites') ? properties.satellites : [];
     this.axialTilt = properties.hasOwnProperty('axialTilt') ? properties.axialTilt : 0;
+    this.angle = 0;
 
     this.initMesh = function (scale) {
-        var i, satellite;
+        var satellite, name;
         if (this.mesh === null) {
             if (this.texture === null) {
                 this.mesh = new THREE.Mesh(
-                    new THREE.SphereGeometry(this.radius * astroParams.radiusScale, 32, 32),
+                    new THREE.SphereGeometry(this.radius * astroParams.radiusScale / Astro.Const.AE * 10000, 32, 32),
                     new THREE.MeshBasicMaterial({color : this.color, wireframe : true })
                 );
             } else {
@@ -165,130 +166,213 @@ var AstronomicalObject = function (properties) {
             }
         }
         this.mesh.rotation.x =  this.axialTilt;
-        for (i = 0; i < this.satellites.length; i += 1) {
-            satellite = this.satellites[i];
-            satellite.astronomicalObject.initMesh(scale);
+
+        for (name in this.satellites) {
+            if (this.satellites.hasOwnProperty(name)) {
+                satellite = this.satellites[name];
+                satellite.astronomicalObject = new AstronomicalObject(satellite);
+                satellite.astronomicalObject.initMesh(scale);
+            }
         }
     };
 
     this.addToScene = function (scene) {
-        var i, satellite;
+        var satellite, name;
         scene.add(this.mesh);
-        for (i = 0; i < this.satellites.length; i += 1) {
-            satellite = this.satellites[i];
-            satellite.astronomicalObject.addToScene(scene);
+        for (name in this.satellites) {
+            if (this.satellites.hasOwnProperty(name)) {
+                satellite = this.satellites[name];
+                satellite.astronomicalObject.addToScene(scene);
+            }
         }
     };
 
     this.move = function () {
-        var i, satellite, astronomicalObject;
+        var satellite, astronomicalObject, name;
 
-        this.mesh.rotation.y +=  this.rotationPeriod / 100 * astroParams.timeFactor;
+        this.mesh.rotation.y +=  1 / this.rotationPeriod * astroParams.timeFactor / 96;
         this.mesh.scale.x = Math.log(astroParams.radiusScale * Math.E);
         this.mesh.scale.y = Math.log(astroParams.radiusScale * Math.E);
         this.mesh.scale.z = Math.log(astroParams.radiusScale * Math.E);
 
-        for (i = 0; i < this.satellites.length; i += 1) {
-            satellite = this.satellites[i];
-            satellite.angle += 1 / satellite.orbitalPeriod * astroParams.timeFactor;
+        for (name in this.satellites) {
+            if (this.satellites.hasOwnProperty(name)) {
+                satellite = this.satellites[name];
+                astronomicalObject = satellite.astronomicalObject;
 
-            astronomicalObject = satellite.astronomicalObject;
-            astronomicalObject.mesh.position.x = this.mesh.position.x + satellite.distance * astroParams.distanceScale * Math.cos(satellite.angle);
-            astronomicalObject.mesh.position.z = this.mesh.position.z + satellite.distance * astroParams.distanceScale * Math.sin(satellite.angle);
+                astronomicalObject.angle += astroParams.timeFactor / satellite.orbitalPeriod / 96;
+                astronomicalObject.mesh.position.x = this.mesh.position.x + satellite.distance / Astro.Const.AE * 300 * astroParams.distanceScale * Math.cos(astronomicalObject.angle);
+                astronomicalObject.mesh.position.z = this.mesh.position.z + satellite.distance / Astro.Const.AE * 300 * astroParams.distanceScale * Math.sin(astronomicalObject.angle);
 
-            astronomicalObject.move();
+                astronomicalObject.move();
+            }
         }
     };
 };
 
-var SatelliteObject = function (astronomicalObject, orbitalPeriod, distance, angle) {
-    'use strict';
-    this.astronomicalObject = astronomicalObject;
-    this.orbitalPeriod = orbitalPeriod; // days
-    this.distance = distance; // km
-    this.angle = angle;
+// https://en.wikipedia.org/wiki/List_of_gravitationally_rounded_objects_of_the_Solar_System
+var solarSystem = {
+    sun : {
+        radius         : 696000, // km
+        rotationPeriod : 25.38, // d
+        axialTilt      : THREE.Math.degToRad(7.25), // rad
+        color          : 'yellow',
+        texture        : 'images/700328main_20121014_003615_flat.jpg',
+        satellites     : {
+            mercury : {
+                distance       : 57909175, // km
+                radius         : 2439.64, // km
+                rotationPeriod : 58.646225, // d
+                orbitalPeriod  : 0.2408467 * 365, // d,
+                inclination    : THREE.Math.degToRad(7),
+                axialTilt      : 0,
+                texture        : 'images/mer0muu2.jpg'
+            },
+
+            venus : {
+                distance       : 108208930, // km
+                radius         : 6051.59, // km
+                rotationPeriod : 243.0187, // d
+                orbitalPeriod  : 0.61519726 * 365, // d,
+                inclination    : THREE.Math.degToRad(3.39),
+                axialTilt      : THREE.Math.degToRad(177.3),
+                texture        : 'images/ven0mss2.jpg'
+            },
+
+            earth : {
+                distance       : 149597890, // km
+                radius         : 6378.1, // km
+                rotationPeriod : 0.99726968, // d
+                orbitalPeriod  : 1.0000174 * 365, // d,
+                inclination    : THREE.Math.degToRad(23.44),
+                axialTilt      : 0,
+                texture        : 'images/earth_atmos_2048.jpg',
+                satellites     : {
+                    moon : {
+                        distance       : 384399, // km
+                        radius         : 1737.1, // km
+                        rotationPeriod : 27.321582, // d
+                        orbitalPeriod  : 27.32158, // d,
+                        inclination    : THREE.Math.degToRad(18.29),
+                        axialTilt      : THREE.Math.degToRad(6.68),
+                        texture        : 'images/ear1ccc2.jpg'
+                    }
+                }
+            },
+
+            mars : {
+                distance       : 227936640, // km
+                radius         : 3397.00, // km
+                rotationPeriod : 1.02595675, // d
+                orbitalPeriod  : 1.8808476, // d,
+                inclination    : THREE.Math.degToRad(23.44),
+                axialTilt      : 0,
+                texture        : 'images/mar0kuu2.jpg',
+                satellites     : {
+                    phobos : {
+                        distance       : 9377.2, // km
+                        radius         : 11.1, // km
+                        rotationPeriod : 0.31891023, // d
+                        orbitalPeriod  : 0.31891023, // d,
+                        inclination    : THREE.Math.degToRad(1.093), // 18.29–28.58
+                        axialTilt      : 0,
+                        color        : 'red'
+                    },
+
+                    deimos : {
+                        distance       : 23460, // km
+                        radius         : 6.2, // km
+                        rotationPeriod : 1.26244, // d
+                        orbitalPeriod  : 1.26244, // d,
+                        inclination    : THREE.Math.degToRad(0.93), // 18.29–28.58
+                        axialTilt      : 0,
+                        color        : 'green'
+                    }
+                }
+            },
+
+            jupiter : {
+                distance       : 778412010, // km
+                radius         : 71492.68, // km
+                rotationPeriod : 0.41354, // d
+                orbitalPeriod  : 11.862615 * 365, // d,
+                inclination    : THREE.Math.degToRad(1.31),
+                axialTilt      : THREE.Math.degToRad(3.12),
+                texture        : 'images/jup0vss1.jpg',
+                satellites: {
+                    io : {
+                        distance       : 421600, // km
+                        radius         : 1815, // km
+                        rotationPeriod : 1.7691378, // d
+                        orbitalPeriod  : 1.769138, // d,
+                        inclination    : THREE.Math.degToRad(0.04),
+                        axialTilt      : 0,
+                        color          : 'gray'
+                    },
+                    europa : {
+                        distance       : 670900, // km
+                        radius         : 1569, // km
+                        rotationPeriod : 3.551181, // d
+                        orbitalPeriod  : 3.551181, // d,
+                        inclination    : THREE.Math.degToRad(0.47),
+                        axialTilt      : 0,
+                        texture        : 'images/jup2vuu2.jpg'
+                    },
+                    ganymede : {
+                        distance       : 1070400, // km
+                        radius         : 2634.1, // km
+                        rotationPeriod : 7.154553, // d
+                        orbitalPeriod  : 7.154553, // d,
+                        inclination    : THREE.Math.degToRad(1.85),
+                        axialTilt      : 0,
+                        texture        : 'images/jup3vuu2.jpg'
+                    },
+                    callisto : {
+                        distance       : 1882700, // km
+                        radius         : 2410.3, // km
+                        rotationPeriod : 16.68902, // d
+                        orbitalPeriod  : 16.68902, // d,
+                        inclination    : THREE.Math.degToRad(0.2),
+                        axialTilt      : 0,
+                        texture        : 'images/jup4vuu2.jpg'
+                    }
+                }
+            },
+
+            saturn : {
+                distance       : 1426725400, // km
+                radius         : 60267.14, // km
+                rotationPeriod : 0.44401, // d
+                orbitalPeriod  : 29.447498 * 365, // d,
+                inclination    : THREE.Math.degToRad(2.48),
+                axialTilt      : THREE.Math.degToRad(26.73),
+                texture        : 'images/sat0fds1.jpg'
+            },
+
+            uranus : {
+                distance       : 2870972200, // km
+                radius         : 25557.25, // km
+                rotationPeriod : 0.71833, // d
+                orbitalPeriod  : 84.016846 * 365, // d,
+                inclination    : THREE.Math.degToRad(0.76),
+                axialTilt      : THREE.Math.degToRad(97.86),
+                texture        : 'images/ura0fss1.jpg'
+            },
+
+            neptune : {
+                distance       : 4498252900, // km
+                radius         : 24766.36, // km
+                rotationPeriod : 0.67125, // d
+                orbitalPeriod  : 164.79132 * 365, // d,
+                inclination    : THREE.Math.degToRad(1.77),
+                axialTilt      : THREE.Math.degToRad(29.58),
+                texture        : 'images/nep0fds1.jpg'
+            }
+        }
+    }
 };
 
-var venus = new AstronomicalObject(
-    {
-        radius        : 0.9488,
-        rotationPeriod : 243.0187,
-        axialTilt     : THREE.Math.degToRad(177.3),
-        texture       : 'images/ven0mss2.jpg',
-        color         : 'red',
-        satellites    : []
-    }
-);
-var apollo13 = new AstronomicalObject(
-    {
-        radius        : 0.2,
-        rotationPeriod : 10,
-        color         : 'pink',
-        satellites    : []
-    }
-);
-var moon = new AstronomicalObject(
-    {
-        radius        : 3474.2 / Astro.Const.EARTH_RADIUS,
-        rotationPeriod : 27.321582,
-        axialTilt     : THREE.Math.degToRad(6.68),
-        texture       : 'images/ear1ccc2.jpg',
-        color         : 'black',
-        satellites    : [new SatelliteObject(apollo13, 10, 384400 / Astro.Const.AE, 0)]
-    }
-);
-var earth = new AstronomicalObject(
-    {
-        radius        : 1,
-        rotationPeriod : 1,
-        axialTilt     : THREE.Math.degToRad(23.45),
-        texture       : 'images/earth_atmos_2048.jpg',
-        color         : 'blue',
-        satellites    : [new SatelliteObject(moon, 28, 384400 / Astro.Const.AE, 0)]
-    }
-);
-
-var phobos = new AstronomicalObject(
-    {
-        radius        : 0.1,
-        rotationPeriod : 1 / 0.5,
-        color         : 'green',
-        satellites    : []
-    }
-);
-var deimos = new AstronomicalObject(
-    {
-        radius        : 0.1,
-        rotationPeriod : 1 / 0.5,
-        color         : 'gray',
-        satellites    : []
-    }
-);
-var mars = new AstronomicalObject(
-    {
-        radius        : 0.5326,
-        rotationPeriod : 1.02595675,
-        axialTilt     : THREE.Math.degToRad(25.19),
-        texture       : 'images/mar0kuu2.jpg',
-        color         : 'red',
-        satellites    : [
-            new SatelliteObject(phobos, 0.3189 * 10, 9378 / Astro.Const.AE, 0),
-            new SatelliteObject(deimos, 1.262 * 10, 23459 / Astro.Const.AE, 0)
-        ]
-    }
-);
-var sun = new AstronomicalObject(
-    {
-        radius        : 696350 / Astro.Const.EARTH_RADIUS,
-        rotationPeriod : 1,
-        color         : 'yellow',
-        satellites    : [
-            new SatelliteObject(venus, 224.701, 0.723, 0),
-            new SatelliteObject(earth, 365.256, 1, 0),
-            new SatelliteObject(mars, 686.980, 1.524, 0)
-        ]
-    }
-);
+var sun = new AstronomicalObject(solarSystem.sun);
 
 function ready() {
     'use strict';
