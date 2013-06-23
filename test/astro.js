@@ -1,6 +1,6 @@
 var Astro = {
     Const : {
-        AE           : 149597870700, // m, distance between sun and earth
+        AE           : 149597870.700, // km, distance between sun and earth
         YEAR         : 365.256, // d year on earth
         EARTH_RADIUS : 6378.15 // km
     }
@@ -30,32 +30,32 @@ var astroParams = {
     distanceScaleUp : function () {
         'use strict';
         this.distanceScale *= 1.01;
-        if (this.distanceScale > 2) {
-            this.distanceScale = 2;
+        if (this.distanceScale > 1000) {
+            this.distanceScale = 1000;
         }
     },
 
     distanceScaleDown : function () {
         'use strict';
         this.distanceScale /= 1.01;
-        if (this.distanceScale < 0.01) {
-            this.distanceScale = 0.01;
+        if (this.distanceScale < 0.0001) {
+            this.distanceScale = 0.0001;
         }
     },
 
     radiusScaleUp : function () {
         'use strict';
         this.radiusScale *= 1.01;
-        if (this.radiusScale > 2) {
-            this.radiusScale = 2;
+        if (this.radiusScale > 1000) {
+            this.radiusScale = 1000;
         }
     },
 
     radiusScaleDown : function () {
         'use strict';
         this.radiusScale /= 1.01;
-        if (this.radiusScale < 0.01) {
-            this.radiusScale = 0.01;
+        if (this.radiusScale < 0.0001) {
+            this.radiusScale = 0.0001;
         }
     }
 };
@@ -145,7 +145,7 @@ var AstroMesh = function (radius, image) {
 var AstronomicalObject = function (properties) {
     'use strict';
     this.radius = properties.radius; // km
-    this.rotationSpeed = properties.rotationSpeed; // d
+    this.rotationPeriod = properties.rotationPeriod; // d
     this.mesh = properties.hasOwnProperty('mesh') ? properties.mesh : null;
     this.color = properties.color;
     this.texture = properties.hasOwnProperty('texture') ? properties.texture : null;
@@ -183,7 +183,7 @@ var AstronomicalObject = function (properties) {
     this.move = function () {
         var i, satellite, astronomicalObject;
 
-        this.mesh.rotation.y +=  this.rotationSpeed / 100 * astroParams.timeFactor;
+        this.mesh.rotation.y +=  this.rotationPeriod / 100 * astroParams.timeFactor;
         this.mesh.scale.x = Math.log(astroParams.radiusScale * Math.E);
         this.mesh.scale.y = Math.log(astroParams.radiusScale * Math.E);
         this.mesh.scale.z = Math.log(astroParams.radiusScale * Math.E);
@@ -209,10 +209,20 @@ var SatelliteObject = function (astronomicalObject, orbitalPeriod, distance, ang
     this.angle = angle;
 };
 
+var venus = new AstronomicalObject(
+    {
+        radius        : 0.9488,
+        rotationPeriod : 243.0187,
+        axialTilt     : THREE.Math.degToRad(177.3),
+        texture       : 'images/ven0mss2.jpg',
+        color         : 'red',
+        satellites    : []
+    }
+);
 var apollo13 = new AstronomicalObject(
     {
         radius        : 0.2,
-        rotationSpeed : 10,
+        rotationPeriod : 10,
         color         : 'pink',
         satellites    : []
     }
@@ -220,35 +230,28 @@ var apollo13 = new AstronomicalObject(
 var moon = new AstronomicalObject(
     {
         radius        : 3474.2 / Astro.Const.EARTH_RADIUS,
-        rotationSpeed : -1,
+        rotationPeriod : 27.321582,
+        axialTilt     : THREE.Math.degToRad(6.68),
         texture       : 'images/ear1ccc2.jpg',
         color         : 'black',
-        satellites    : [new SatelliteObject(apollo13, 10, 384400 / Astro.Const.AE * 2000000, 0)]
+        satellites    : [new SatelliteObject(apollo13, 10, 384400 / Astro.Const.AE, 0)]
     }
 );
 var earth = new AstronomicalObject(
     {
         radius        : 1,
-        rotationSpeed : 1,
-        axialTilt     : 23 / 180 * Math.PI,
+        rotationPeriod : 1,
+        axialTilt     : THREE.Math.degToRad(23.45),
         texture       : 'images/earth_atmos_2048.jpg',
         color         : 'blue',
-        satellites    : [new SatelliteObject(moon, 28, 384400 / Astro.Const.AE * 6000000, 0)]
+        satellites    : [new SatelliteObject(moon, 28, 384400 / Astro.Const.AE, 0)]
     }
 );
-var venus = new AstronomicalObject(
-    {
-        radius        : 0.9488,
-        rotationSpeed : -1,
-        texture       : 'images/ven0mss2.jpg',
-        color         : 'red',
-        satellites    : []
-    }
-);
+
 var phobos = new AstronomicalObject(
     {
         radius        : 0.1,
-        rotationSpeed : 1 / 0.5,
+        rotationPeriod : 1 / 0.5,
         color         : 'green',
         satellites    : []
     }
@@ -256,7 +259,7 @@ var phobos = new AstronomicalObject(
 var deimos = new AstronomicalObject(
     {
         radius        : 0.1,
-        rotationSpeed : 1 / 0.5,
+        rotationPeriod : 1 / 0.5,
         color         : 'gray',
         satellites    : []
     }
@@ -264,7 +267,8 @@ var deimos = new AstronomicalObject(
 var mars = new AstronomicalObject(
     {
         radius        : 0.5326,
-        rotationSpeed : 1,
+        rotationPeriod : 1.02595675,
+        axialTilt     : THREE.Math.degToRad(25.19),
         texture       : 'images/mar0kuu2.jpg',
         color         : 'red',
         satellites    : [
@@ -276,12 +280,12 @@ var mars = new AstronomicalObject(
 var sun = new AstronomicalObject(
     {
         radius        : 696350 / Astro.Const.EARTH_RADIUS,
-        rotationSpeed : 1,
+        rotationPeriod : 1,
         color         : 'yellow',
         satellites    : [
-            new SatelliteObject(venus, 224.701, 0.723 * 200, 0),
-            new SatelliteObject(earth, 365.256, 200, 0),
-            new SatelliteObject(mars, 686.980, 1.524 * 200, 0)
+            new SatelliteObject(venus, 224.701, 0.723, 0),
+            new SatelliteObject(earth, 365.256, 1, 0),
+            new SatelliteObject(mars, 686.980, 1.524, 0)
         ]
     }
 );
