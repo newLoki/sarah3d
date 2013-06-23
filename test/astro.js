@@ -163,6 +163,10 @@ var AstronomicalObject = function (radius, rotationSpeed, mesh, color, satellite
         var i, satellite, astronomicalObject;
 
         this.mesh.rotation.y +=  this.rotationSpeed / 100 * astroParams.timeFactor;
+        this.mesh.scale.x = Math.log(astroParams.radiusScale * Math.E);
+        this.mesh.scale.y = Math.log(astroParams.radiusScale * Math.E);
+        this.mesh.scale.z = Math.log(astroParams.radiusScale * Math.E);
+
         for (i = 0; i < this.satellites.length; i += 1) {
             satellite = this.satellites[i];
             satellite.angle += 1 / satellite.orbitalPeriod * astroParams.timeFactor;
