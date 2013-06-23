@@ -128,6 +128,23 @@ var AstroControl = function () {
     };
 };
 
+var AppControlStats = function () {
+    'use strict';
+    var container = document.createElement('div');
+    container.id = 'stats';
+
+    return {
+        domElement : container,
+        update     : function () {
+            container.innerHTML = 'Status<br/>' +
+                'timeFactor = ' + astroParams.timeFactor + '<br/>' +
+                'distanceScale = ' + astroParams.distanceScale + '<br/>' +
+                'radiusScale = ' + astroParams.radiusScale;
+
+        }
+    };
+};
+
 var AstroMesh = function (radius, image) {
     'use strict';
     return new THREE.Mesh(
@@ -384,6 +401,7 @@ function ready() {
         astroControl = new AstroControl(),
         ambient = new THREE.AmbientLight(0xffffff),
         stats,
+        appControlStats,
         astroObject = sun,
         render = function () {
 
@@ -415,6 +433,7 @@ function ready() {
 
             renderer.render(scene, camera);
             stats.update();
+            appControlStats.update();
         };
 
 
@@ -425,6 +444,11 @@ function ready() {
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
+
+    appControlStats = new AppControlStats();
+    appControlStats.domElement.style.position = 'absolute';
+    appControlStats.domElement.style.top = '60px';
+    document.body.appendChild(appControlStats.domElement);
 
     scene.add(ambient);
 
