@@ -2,7 +2,7 @@ var planets = {
     sun     : {
         orbitalPeriod : 0,
         distance      : 0,
-        radius        : 1392700 / 2 / 10,
+        radius        : 696350,
         angle : 0,
         mesh : null,
         color         : 0xffff00

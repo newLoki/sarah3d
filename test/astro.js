@@ -29,7 +29,7 @@ var astroParams = {
 
     distanceScaleUp : function () {
         'use strict';
-        this.distanceScale *= 1.01;
+        this.distanceScale *= 1.001;
         if (this.distanceScale > 1000) {
             this.distanceScale = 1000;
         }
@@ -37,7 +37,7 @@ var astroParams = {
 
     distanceScaleDown : function () {
         'use strict';
-        this.distanceScale /= 1.01;
+        this.distanceScale /= 1.001;
         if (this.distanceScale < 0.0001) {
             this.distanceScale = 0.0001;
         }
@@ -45,7 +45,7 @@ var astroParams = {
 
     radiusScaleUp : function () {
         'use strict';
-        this.radiusScale *= 1.01;
+        this.radiusScale *= 1.001;
         if (this.radiusScale > 1000) {
             this.radiusScale = 1000;
         }
@@ -53,7 +53,7 @@ var astroParams = {
 
     radiusScaleDown : function () {
         'use strict';
-        this.radiusScale /= 1.01;
+        this.radiusScale /= 1.001;
         if (this.radiusScale < 0.0001) {
             this.radiusScale = 0.0001;
         }
@@ -389,8 +389,6 @@ var solarSystem = {
     }
 };
 
-var sun = new AstronomicalObject(solarSystem.sun);
-
 function ready() {
     'use strict';
 
@@ -402,7 +400,7 @@ function ready() {
         ambient = new THREE.AmbientLight(0xffffff),
         stats,
         appControlStats,
-        astroObject = sun,
+        astroObject = new AstronomicalObject(solarSystem.sun),
         render = function () {
 
             if (astroControl.isRunning) {
